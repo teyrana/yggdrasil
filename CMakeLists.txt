@@ -92,10 +92,12 @@ SET(LIB_HEADERS src/base/chart-interface.hpp
 SET(CHART_GEOMETRY_LIB_NAME chartgeom)
 SET(LIB_HEADERS src/geometry/bounds.hpp
                 src/geometry/interpolate.hpp src/geometry/interpolate.inl
+                src/geometry/path.hpp
                 src/geometry/polygon.hpp
                 src/geometry/raster.hpp
                 )
 SET(LIB_SOURCES src/geometry/bounds.cpp
+                src/geometry/path.cpp
                 src/geometry/polygon.cpp
                 )
 add_library(${CHART_GEOMETRY_LIB_NAME} STATIC ${LIB_HEADERS} ${LIB_SOURCES})
@@ -132,6 +134,7 @@ SET(LIB_HEADERS src/index/row-index.hpp )
 SET(TEST_EXE testall)
 SET(TEST_SOURCES    src/geometry/bounds.test.cpp
                     src/geometry/interpolate.test.cpp
+                    src/geometry/path.test.cpp
                     src/geometry/polygon.test.cpp
                     src/index/row-index.test.cpp
                     src/index/z-index.test.cpp

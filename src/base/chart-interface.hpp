@@ -6,6 +6,7 @@
 #include <Eigen/Geometry>
 
 #include "geometry/bounds.hpp"
+#include "geometry/path.hpp"
 #include "geometry/polygon.hpp"
 
 namespace chart::base {
@@ -36,7 +37,9 @@ public:
     bool fill(const geometry::Bounds& area, const cell_t value) {
         return static_cast<chart_t*>(this)->fill_from_bounds(area, value); }
 
-   bool fill(const geometry::Polygon& source, const cell_t fill);
+    bool fill(const geometry::Path& source, const cell_t fill);
+
+    bool fill(const geometry::Polygon& source, const cell_t fill);
 
     bool fill(const std::vector<cell_t>& source)
         { return static_cast<chart_t*>(this)->fill_from_buffer(source); }
