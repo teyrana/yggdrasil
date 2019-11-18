@@ -6,6 +6,7 @@
 #include <Eigen/Geometry>
 
 #include "geometry/bounds.hpp"
+#include "geometry/path.hpp"
 #include "geometry/polygon.hpp"
 #include "index/index2u.hpp"
 
@@ -48,6 +49,8 @@ public:
 
     bool fill(const geometry::Bounds& area, const cell_t value) {
         return static_cast<chart_t*>(this)->fill_from_bounds(area, value); }
+
+    bool fill(const geometry::Path& source, const cell_t fill);
 
     /// \brief Fills the _interior_ of the given polygon with the given value.
     /// 

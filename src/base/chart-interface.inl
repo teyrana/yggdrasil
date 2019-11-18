@@ -31,6 +31,7 @@ using Eigen::Vector2d;
 
 using chart::base::ChartInterface;
 using chart::geometry::Bounds;
+using chart::geometry::Path;
 using chart::geometry::Polygon;
 
 // used for reading and write json documents:
@@ -43,6 +44,43 @@ const static inline string tree_key("tree");
 
 // use this cast in order to play nice with the CRTP
 #define THIS static_cast<chart_t*>(this)
+
+template <typename cell_t, typename chart_t>
+bool ChartInterface<cell_t, chart_t>::fill(const geometry::Path& path, const cell_t fill_value){
+    // const bool emphasize_waypoints = false;
+
+    // fill start point
+    THIS->store(path[0], fill_value);
+    
+    // Iterate through the path segments
+    for( size_t segment_index = 0; segment_index < path.size()-1; ++segment_index ){
+        const auto delta = path.segment(segment_index);
+        const size_t x_tick_count = std::abs(delta.x() / THIS->precision());
+        const size_t y_tick_count = std::abs(delta.y() / THIS->precision());
+        // because we're drawing into a square grid, at the worst case (diagonal) we can just 
+        // drop one tick per row, or column, and  we'll have a contiguous line
+        const size_t tick_count = std::max(x_tick_count, y_tick_count);
+        const Vector2d tick_increment = delta / tick_count;
+    
+        // draw minor-tick points in between waypoints
+        const Vector2d segment_start = path[segment_index];
+        Vector2d fill_location = segment_start + tick_increment;
+        for( auto tick_index = 1; tick_index <= tick_count; ++tick_index ){
+            THIS->store( fill_location, fill_value);
+            fill_location += tick_increment; //Vector2d(x_incr, y_incr);
+        }
+
+        // DEBUG: drop a major tick at each waypoint:
+        // if(emphasize_waypoints)
+        //     THIS->store(seg.end, 'O'); // point tick
+    }
+
+    // DEBUG: drop a major tick at the start waypoint
+    // if(emphasize_waypoints)
+    //     THIS->store( path[0], 'O');
+
+    return true;
+}
 
 template <typename cell_t, typename chart_t>
 bool ChartInterface<cell_t, chart_t>::fill(const geometry::Polygon& poly, const cell_t fill_value){

@@ -9,6 +9,7 @@
 #include "nlohmann/json.hpp"
 
 #include "geometry/bounds.hpp"
+#include "geometry/path.hpp"
 #include "geometry/polygon.hpp"
 #include "geometry/raster.hpp"
 
@@ -175,7 +176,7 @@ static const std::vector<uint8_t> default_tile = chart::geometry::vflip<uint8_t>
     76, 75,  0,  0,   0,  0, 72, 71,
     75, 74, 74, 74,  73, 73, 73, 72}, 8);
 
-TEST( FixedGrid, LoadFromVector) {
+TEST( FixedGrid, FillFromVector) {
     FixedGrid64 g;
 
     ASSERT_EQ(default_tile.size(), g.size());
@@ -207,6 +208,42 @@ TEST( FixedGrid, LoadFromVector) {
     ASSERT_EQ( g.get_cell(4,5),  0);
     ASSERT_EQ( g.get_cell(4,6),  0);
     ASSERT_EQ( g.get_cell(4,7), 68);
+}
+
+
+TEST( FixedGrid, FillFromPath) {
+    FixedGrid64 g(Bounds({10.2,10.2}, {18.2,18.2}));
+
+    // preconditions
+    ASSERT_TRUE( g.fill(126) ); // == '~'
+
+    // draw path
+    const uint8_t fill_value = 111;
+    const Path path = {{11,18}, {11,11}, {18,18}};
+    ASSERT_TRUE( g.fill(path, fill_value) ); // == 'o'
+
+    // // DEBUG
+    // cerr << g.to_string() << endl;
+
+    // segment 0:
+    ASSERT_EQ( g.classify({ 11.0, 18.0}), fill_value);
+    ASSERT_EQ( g.classify({ 11.0, 17.0}), fill_value);
+    ASSERT_EQ( g.classify({ 11.0, 16.0}), fill_value);
+    ASSERT_EQ( g.classify({ 11.0, 15.0}), fill_value);
+    ASSERT_EQ( g.classify({ 11.0, 14.0}), fill_value);
+    ASSERT_EQ( g.classify({ 11.0, 13.0}), fill_value);
+    ASSERT_EQ( g.classify({ 11.0, 12.0}), fill_value);
+    ASSERT_EQ( g.classify({ 11.0, 11.0}), fill_value);
+
+    // segment 1:
+    ASSERT_EQ( g.classify({ 11.0, 11.0}), fill_value);
+    ASSERT_EQ( g.classify({ 12.0, 12.0}), fill_value);
+    ASSERT_EQ( g.classify({ 13.0, 13.0}), fill_value);
+    ASSERT_EQ( g.classify({ 14.0, 14.0}), fill_value);
+    ASSERT_EQ( g.classify({ 15.0, 15.0}), fill_value);
+    ASSERT_EQ( g.classify({ 16.0, 16.0}), fill_value);
+    ASSERT_EQ( g.classify({ 17.0, 17.0}), fill_value);
+    ASSERT_EQ( g.classify({ 18.0, 18.0}), fill_value);
 }
 
 TEST( FixedGrid, ClassifyIntoVector) {
