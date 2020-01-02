@@ -56,6 +56,7 @@ INCLUDE_DIRECTORIES(extern)
 INCLUDE_DIRECTORIES(include)
 INCLUDE_DIRECTORIES(src)
 SET(LIB_HEADERS 
+                src/geometry/bounds.hpp
                 src/geometry/index/row-index.hpp
                 src/geometry/index/z-index.hpp src/geometry/index/z-index.inl
                 src/geometry/interpolate.hpp src/geometry/interpolate.inl
@@ -70,6 +71,7 @@ SET(LIB_HEADERS
                 )
 
 SET(LIB_SOURCES
+                src/geometry/bounds.cpp
                 src/geometry/polygon.cpp
                 src/io/writers.cpp
                 # src/node/quad/quad_node.cpp

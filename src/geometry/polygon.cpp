@@ -26,6 +26,7 @@ using std::string;
 
 using Eigen::Vector2d;
 
+using yggdrasil::geometry::Bounds;
 using yggdrasil::geometry::Polygon;
 
 //---------------------------------------------------------------
@@ -52,7 +53,6 @@ Polygon::Polygon(std::vector<Vector2d>& init){
 Polygon::Polygon(std::initializer_list<Vector2d> init_list)
 {
     std::vector<Vector2d> pts = init_list;
-
     load(pts);
 }
 
@@ -61,10 +61,19 @@ void Polygon::clear(){
 }
 
 void Polygon::complete(){
+    // NOTE: Yes, this function performs multiple passes of the point-vector...
+    //       where it could calculate all desired info in one pass.
+    //       This is done for purely for clarity.
+    //       This function is not expected to be hot-path code.
+
     // cerr << "====== ====== ====== " << endl;
     // write_yaml(cerr, "    ");
 
+    // we must enclose before the clockwise-check.
     enclose_polygon();
+
+    recalculate_bounding_box();
+
     if(! is_right_handed()){
         std::reverse(std::begin(points), std::end(points));
     }
@@ -88,7 +97,7 @@ bool Polygon::is_right_handed() const {
     double sum = 0;
 
     // NOTE THE RANGE!:
-    //   this needs to iterate over all doubles
+    //   this needs to iterate over all point-pairs!
     for( uint i = 0; i < (points.size()-1); ++i ){
         auto& p1 = points[i];
         auto& p2 = points[i+1];
@@ -115,7 +124,7 @@ bool Polygon::load(std::vector<Vector2d> source){
     }
 
     points = std::move(source);
-    
+
     complete();
 
     return true;
@@ -141,25 +150,9 @@ bool Polygon::load(nlohmann::json doc){
     return false;
 }
 
-// yggdrasil::geometry::Layout Polygon::make_layout(const double precision) const {
-//     double min_x = DBL_MAX;
-//     double max_x = DBL_MIN;
-//     double min_y = DBL_MAX;
-//     double max_y = DBL_MIN;
-
-//     for( auto p : points ){
-//         min_x = min(min_x, p.x());
-//         max_x = max(max_x, p.x());
-//         min_y = min(min_y, p.y());
-//         max_y = max(max_y, p.y());
-//     }
-
-//     const double ctr_x = round( 0.5*( min_x + max_x ) );
-//     const double ctr_y = round( 0.5*( min_y + max_y ) );
-//     const double width = max(max_x - min_x, max_y - min_y);
-
-//     return Layout(precision, ctr_x, ctr_y, width);
-// }
+const Bounds& Polygon::get_bounds() const {
+    return bounds;
+}
 
 Vector2d& Polygon::operator[](const size_t index){
     return points[index];
@@ -171,6 +164,13 @@ const Vector2d& Polygon::operator[](const size_t index) const {
 
 void Polygon::push_back(const Vector2d p){
     points.push_back(p);
+}
+
+void Polygon::recalculate_bounding_box(){
+    bounds.reset();
+    for( auto& p : points){
+            bounds.grow(p);
+    }
 }
 
 void Polygon::resize( size_t capacity){
@@ -187,6 +187,7 @@ void Polygon::set_default(){
     points.emplace_back( 1, 0);
     points.emplace_back( 1, 1);
     points.emplace_back( 0, 1);
+    bounds = {{0,0}, {1, 1}};
 }
 
 void Polygon::write_yaml(std::ostream& sink, string indent) const {

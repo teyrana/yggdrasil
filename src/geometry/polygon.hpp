@@ -14,7 +14,7 @@
 
 #include <nlohmann/json.hpp>
 
-// #include "geometry/layout.hpp"
+#include "geometry/bounds.hpp"
 
 namespace yggdrasil::geometry {
 
@@ -48,7 +48,7 @@ public:
 
     bool load(nlohmann::json doc);
 
-    // yggdrasil::geometry::Layout make_layout(const double precision=1.0) const;
+    const Bounds& get_bounds() const;
 
     Eigen::Vector2d& operator[](const size_t index);
 
@@ -80,8 +80,11 @@ protected:
 
     void set_default();
 
+    void recalculate_bounding_box();
+
 protected: // Configuration parameters
     std::vector<Eigen::Vector2d> points;    ///< Main data store for this class.  Contains the vertices of the polygon
+    Bounds bounds;
 
 private:
     friend class PolygonTest_DefaultConfiguration_Test;

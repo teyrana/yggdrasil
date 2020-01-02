@@ -1,43 +1,31 @@
 // GPL v3 (c) 2020
 
-#ifndef _BOUNDS_HPP_
-#define _BOUNDS_HPP_
+#ifndef _BOUNDING_BOX_HPP_
+#define _BOUNDING_BOX_HPP_
 
 #include <Eigen/Geometry>
 using Eigen::Vector2d;
 
 namespace yggdrasil::geometry {
 
-constexpr size_t snap_power_2( const size_t target);
-
-class CornerBounds {
-private:
-    const Vector2d min;
-    const Vector2d max;
+class Bounds {
+    Vector2d southwest;
+    Vector2d northeast;
 
 public:
-    Bounds(const vector2d _min, const vector2d _max ): 
-        min(_min), max(_max) 
-    {}
+    Bounds();
+    Bounds( const Vector2d& SW, const Vector2d& NE );
 
-    const vector2d dimensions() const { return {max.x() - min.x(), max.y() - min.y()}; }
-    const double width() const { return {max.x() - min.x(), max.y() - min.y()}.maxCoef(); }
+    // synonym
+    Vector2d anchor() const;
+    Vector2d max() const;
+    Vector2d min() const;
+    Vector2d size() const;
 
-};
+    void grow(const Vector2d& p);
+    void reset();
 
-class WidthBounds {
-public:
-    const Vector2d anchor;
-    const double width;
-    
-public:
-    Bounds(const vector2d _min, const vector2d _max ): 
-        min(_min), width(max.getmax()) 
-    {}
+}; // class Bounds
 
-    const vector2d dimensions() const { return {max.x() - min.x(), max.y() - min.y()}; }
-    
-};
-
-};
-#endif // #ifndef _BOUNDS_HPP_
+}; // namespace yggdrasil::geometry
+#endif // #ifndef _BOUNDING_BOX_HPP_
