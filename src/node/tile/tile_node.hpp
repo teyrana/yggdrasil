@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <Eigen/Geometry>
 
@@ -68,12 +69,17 @@ public:
     ///! \param fill_value - fill value for entire grid
     void fill(const cell_t fill_value);
 
+    ///! \brief sets tile contents
+    ///! \param fill_value - fill value to _move_ into this tile.
+    void fill(const std::vector<cell_t>& fill_data);
+
     ///! \brief Fills the _interior_ of the given polygon with the given value.
     ///! 
     ///! @param source - polygon defining the fill araea. Assumed to be closed, CCW, and non-intersecting
     ///! @param fill_value -fill value for area
     void fill(const Polygon& source, const cell_t fill_value);
 
+    /// \brief used for loading a flatbuffer data structure
     static std::unique_ptr<TileNode> make(const std::byte * const buffer);
 
     ///! \brief loads a json document from the given input stream
@@ -128,7 +134,7 @@ private:
     yggdrasil::geometry::index::RowMajorIndex<dimension, cell_t> index;
 
 private:
-    friend class TileTest_CacheRoundTrip_Test;
+    friend class Tile_CacheRoundTrip_Test;
     // friend class TileTest_XYToIndex_Test;
 
 }; // class Tile

@@ -1,8 +1,6 @@
 // // GPL v3 (c) 2020
 
-#include <cstddef>
 #include <iostream>
-#include <memory>
 #include <sstream>
 
 using std::byte;
@@ -114,6 +112,20 @@ bool TileNode::contains(const Vector2d& p) const {
 
 void TileNode::fill(const cell_t value){
     memset( data.data(), value, sizeof(cell_t) * size );
+}
+
+void TileNode::fill(const std::vector<TileNode::cell_t>& source){
+    if( source.size() < data.size()){
+        return;
+    }
+
+    size_t read_index = 0;
+    for(size_t j = dimension-1; j < dimension; --j ){
+        for(size_t i = 0; i < dimension; ++i ){
+            index(i,j) = source[read_index];
+            ++read_index;
+        }
+    }
 }
 
 TileNode::cell_t& TileNode::get_cell(const size_t xi, const size_t yi) {
@@ -235,7 +247,6 @@ std::string TileNode::to_string() const {
     std::ostringstream buf;
 
     buf << " ======== ======== ======== Print Grid: ======== ======== ========\n";
-    
     for(size_t j = dimension-1; j < dimension; --j ){
         for(size_t i = 0; i < dimension; ++i ){
             const auto value = index(i,j);
