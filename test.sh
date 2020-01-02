@@ -1,17 +1,23 @@
 #!/bin/bash
 
-INVOCATION_ABS_DIR=`pwd`
-BUILD_TYPE="Release"
-BUILD_DIR="build"
+clear 
 
-pushd $BUILD_DIR
-
-bin/testall "$@"
-
+# Build Tests
+# ======
+./build.sh
 SUCCESS=$?
 if [ "$SUCCESS" -ne "0" ]; then
     exit $SUCCESS
 fi
 
+# Run Tests
+# ======
+if [ ! -z "$@" ]; then
+    TEST_ARGS=--gtest_filter="$@"*
+fi
+build/bin/testall $TEST_ARGS
+SUCCESS=$?
+if [ "$SUCCESS" -ne "0" ]; then
+    exit $SUCCESS
+fi
 
-popd
