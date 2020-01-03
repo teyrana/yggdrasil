@@ -7,8 +7,8 @@
 
 #include "gtest/gtest.h"
 
-#include "z_index.hpp"
-using yggdrasil::geometry::ZOrderCurveIndex;
+#include "z-index.hpp"
+using yggdrasil::geometry::index::ZOrderCurveIndex;
 
 using std::cerr;
 using std::endl;
@@ -18,13 +18,13 @@ typedef uint8_t cell_t;
 typedef std::array<cell_t, 16> array_t;
 typedef std::vector<cell_t> vector_t;
 
-TEST(IndexTest, IndexZOrderCurveConst ){
+TEST(ZOrderIndex, IndexZOrderCurveConst ){
     ASSERT_EQ( sizeof(uint64_t), 8);  // should be guaranteed, by spec
     ASSERT_EQ( sizeof(size_t), 8);    // not strictly necessary
 
     array_t grid = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
 
-    const yggdrasil::geometry::ZOrderCurveIndex<4, cell_t> index(grid);
+    const ZOrderCurveIndex<4, cell_t> index(grid);
 
     ASSERT_EQ( index.padding, 60);
 
@@ -49,13 +49,13 @@ TEST(IndexTest, IndexZOrderCurveConst ){
     ASSERT_EQ( index( 3, 3), 15);
 }
 
-TEST(IndexTest, IndexZOrderCurveMutable ){
+TEST(ZOrderIndex, IndexZOrderCurveMutable ){
     ASSERT_EQ( sizeof(uint64_t), 8);  // should be guaranteed, by spec
     ASSERT_EQ( sizeof(size_t), 8);    // not strictly necessary
 
     array_t grid = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
 
-    yggdrasil::geometry::ZOrderCurveIndex<4, cell_t> index(grid);
+    ZOrderCurveIndex<4, cell_t> index(grid);
 
     ASSERT_EQ( index.padding, 60);
 

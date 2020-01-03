@@ -56,8 +56,8 @@ INCLUDE_DIRECTORIES(extern)
 INCLUDE_DIRECTORIES(include)
 INCLUDE_DIRECTORIES(src)
 SET(LIB_HEADERS 
-                src/geometry/row_index.hpp src/geometry/row_index.inl
-                src/geometry/z_index.hpp src/geometry/z_index.inl
+                src/geometry/index/row-index.hpp
+                src/geometry/index/z-index.hpp src/geometry/index/z-index.inl
                 src/geometry/interpolate.hpp src/geometry/interpolate.inl
                 src/geometry/polygon.hpp
                 # src/io/json.hpp
@@ -96,8 +96,8 @@ enable_testing()
 # https://cmake.org/cmake/help/v3.0/module/FindGTest.html 
 SET(TEST_EXE testall) 
 SET(TEST_SOURCES    
-                    src/geometry/row_index.test.cpp
-                    src/geometry/z_index.test.cpp
+                    src/geometry/index/row-index.test.cpp
+                    src/geometry/index/z-index.test.cpp
                     src/geometry/interpolate.test.cpp
                     src/geometry/polygon.test.cpp
                     # src/node/quad_node.cpp

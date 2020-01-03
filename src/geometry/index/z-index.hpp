@@ -4,7 +4,7 @@
 #define _INDEX_HPP_
 
 
-namespace yggdrasil::geometry {
+namespace yggdrasil::geometry::index {
 
 inline constexpr uint8_t _calculate_padding(const size_t dimension);
 inline uint64_t _interleave( const uint32_t input);
@@ -32,8 +32,8 @@ private:
     storage_t& data;
 };
 
-} // namespace yggdrasil::geometry
+} // namespace yggdrasil::geometry::index
 
-#include "z_index.inl"
+#include "z-index.inl"
 
 #endif // #ifdef _GEOMETRY_INDEX_HPP_

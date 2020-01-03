@@ -14,7 +14,7 @@
 
 #include <nlohmann/json.hpp>
 
-#include "geometry/row_index.hpp"
+#include "geometry/index/row-index.hpp"
 // #include "geometry/z_index.hpp"
 #include "geometry/polygon.hpp"
 
@@ -125,7 +125,7 @@ private:
     std::array< cell_t, size > data;
 
     /// \brief defines lookup method for data in this tile
-    yggdrasil::geometry::RowMajorIndex<dimension, cell_t> index;
+    yggdrasil::geometry::index::RowMajorIndex<dimension, cell_t> index;
 
 private:
     friend class TileTest_CacheRoundTrip_Test;

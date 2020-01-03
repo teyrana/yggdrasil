@@ -1,6 +1,6 @@
 // GPL v3 (c) 2020
 
-namespace yggdrasil::geometry {
+namespace yggdrasil::geometry::index {
 
 // ========= ========= ========= Free Functions: Z-Order Curve Index========= ========= =========
 
@@ -60,4 +60,4 @@ constexpr const cell_t& ZOrderCurveIndex<dimension, cell_t,storage_t>::operator(
 }
 
 
-} // namespace yggdrasil::geometry
+} // namespace yggdrasil::geometry::index

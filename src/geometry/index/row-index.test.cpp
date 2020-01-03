@@ -7,8 +7,8 @@
 
 #include "gtest/gtest.h"
 
-#include "row_index.hpp"
-using yggdrasil::geometry::RowMajorIndex;
+#include "row-index.hpp"
+using yggdrasil::geometry::index::RowMajorIndex;
 
 using std::cerr;
 using std::endl;
@@ -18,7 +18,7 @@ typedef uint8_t cell_t;
 typedef std::array<cell_t, 16> array_t;
 typedef std::vector<cell_t> vector_t;
 
-TEST(IndexTest, IndexByRowMajor) {
+TEST(RowMajorIndex, IndexByRowMajor) {
     array_t initial_grid = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
     
     const RowMajorIndex<4, cell_t> index( initial_grid );
@@ -44,7 +44,7 @@ TEST(IndexTest, IndexByRowMajor) {
     ASSERT_EQ( index( 3, 3), 15);
 }
 
-TEST(IndexTest, IndexByRowMajorModifyArray) {
+TEST(RowMajorIndex, IndexByRowMajorModifyArray) {
     array_t initial_grid = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
 
     RowMajorIndex<4, cell_t> index( initial_grid );
@@ -66,7 +66,7 @@ TEST(IndexTest, IndexByRowMajorModifyArray) {
     EXPECT_EQ( index( 3, 0),  103);
 }
 
-TEST(IndexTest, IndexByRowMajorVectorBacking) {
+TEST(RowMajorIndex, IndexByRowMajorVectorBacking) {
     vector_t buffer = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
 
     RowMajorIndex<4, cell_t, vector_t> index( buffer );
