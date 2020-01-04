@@ -47,8 +47,13 @@ public:
       */
     ~TileNode(){};
 
-    ///! \brief Draws a simple debug representation of this grid to stderr
-    void debug() const;
+    /// \brief used for loading a flatbuffer data structure
+    static std::unique_ptr<TileNode> build_from_flatbuffer(const std::byte * const buffer);
+
+    ///! \brief loads a json document from the given buffer
+    ///! 
+    ///! Note: this json document may contain either polygons or a grid, and will be automatically loaded correctly
+    static std::unique_ptr<TileNode> build_from_json(const std::string& buffer);
 
     ///! \brief retrieve the value at given world coordinate (x, y)
     ///!
@@ -79,20 +84,14 @@ public:
     ///! @param fill_value -fill value for area
     void fill(const Polygon& source, const cell_t fill_value);
 
-    /// \brief used for loading a flatbuffer data structure
-    static std::unique_ptr<TileNode> make(const std::byte * const buffer);
+    const geometry::Bounds get_bounds() const ;
 
-    ///! \brief loads a json document from the given input stream
-    ///! 
-    ///! Note: this json document may contain either polygons or a grid, and will be automatically loaded correctly
-    static std::unique_ptr<TileNode> make(const std::string& buffer);
+    /// \brief used for loading a flatbuffer data structure
+    bool load_from_flatbuffer( const std::byte* const buffer);
 
     inline void reset(){}
 
     // void set(const double x, const double y, const T new_value);
-
-    cell_t& get_cell(const size_t xi, const size_t yi);
-    cell_t get_cell(const size_t xi, const size_t yi) const;
 
     bool store(const Eigen::Vector2d& p, const cell_t new_value);
 
@@ -103,9 +102,11 @@ public:
     
     std::vector<std::byte> to_raster() const;
 
+    const std::byte* const to_flatbuffer();
+
 private:
-    bool cache_read( const std::byte* const buffer);
-    const std::byte* const cache_write();
+    cell_t& get_cell(const size_t xi, const size_t yi);
+    cell_t get_cell(const size_t xi, const size_t yi) const;
 
 private:
     // used for reading and write json documents:
@@ -135,7 +136,7 @@ private:
 
 private:
     friend class Tile_CacheRoundTrip_Test;
-    // friend class TileTest_XYToIndex_Test;
+    friend class Tile_LoadPolygonFromVector_Test;
 
 }; // class Tile
 

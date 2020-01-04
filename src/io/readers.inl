@@ -25,7 +25,53 @@ using std::string;
 using Eigen::Vector2d;
 
 using yggdrasil::geometry::Polygon;
-using yggdrasil::node::TileNode;
+
+template<typename target_t, typename cell_t>
+void yggdrasil::io::fill_from_polygon(target_t& t, const Polygon& poly, const cell_t fill_value){
+    // adapted from:
+    //  Public-domain code by Darel Rex Finley, 2007:  "Efficient Polygon Fill Algorithm With C Code Sample"
+    //  Retrieved: (https://alienryderflex.com/polygon_fill/); 2019-09-07
+
+    const double scale_2 = t.scale/2;
+
+    const Bounds bounds = t.get_bounds();
+
+    // Loop through the rows of the image.
+    for( double y = bounds.min().y() + scale_2; y < bounds.max().y(); y += t.scale ){
+        // generate a list of line-segment crossings from the polygon
+        std::vector<double> crossings;
+        for (int i=0; i < poly.size()-1; ++i) {
+            const Vector2d& p1 = poly[i];
+            const Vector2d& p2 = poly[i+1];
+
+            const double y_max = std::max(p1[1], p2[1]);
+            const double y_min = std::min(p1[1], p2[1]);
+            // if y is in range:
+            if( (y_min <= y) && (y < y_max) ){
+                // construct x-coordinate that crosses this line:
+                auto value = p1[0] + (y - p1[1]) * (p2[0]-p1[0])/(p2[1] - p1[1]);
+                crossings.emplace_back(value);
+            }
+        }
+
+        // early exit
+        if( 0 == crossings.size()){
+            continue;
+        }
+
+        // Sort the crossings:
+        std::sort(crossings.begin(), crossings.end());
+
+        //  Fill the pixels between node pairs.
+        for( int crossing_index = 0; crossing_index < crossings.size(); crossing_index += 2){
+            const double start_x = bounds.constrain_x(crossings[crossing_index] + scale_2);
+            const double end_x = bounds.constrain_x(crossings[crossing_index+1] + scale_2);
+            for( double x = start_x; x < end_x; x += t.scale){
+                t.store({x,y}, fill_value);
+            }
+        }
+    }
+}
 
 template<typename target_t, typename cell_t>
 bool yggdrasil::io::load_grid_from_json(target_t& target, nlohmann::json grid ){

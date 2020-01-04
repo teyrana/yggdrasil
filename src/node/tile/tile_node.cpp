@@ -16,6 +16,11 @@ using std::vector;
 
 using Eigen::Vector2d;
 
+#include "geometry/bounds.hpp"
+using yggdrasil::geometry::Bounds;
+
+#include "io/readers.hpp"
+
 #include "tile_node.hpp"
 
 // auto-generated code for flatbuffers serialization.
@@ -39,104 +44,7 @@ TileNode::TileNode(const Vector2d& _anchor):
     index(data)
 {}
 
-
-bool TileNode::cache_read( const std::byte* const buffer){
-    auto tile_cache = GetTileCache( buffer );
-
-    const Eigen::Vector2d expected = { tile_cache->x(), tile_cache->y() };
-    if( ! expected.isApprox( anchor ) ){
-        return false;
-    }
- 
-    auto gridv = tile_cache->grid();
-    if( gridv->size() != size ){
-        return false;
-    }
-    const uint8_t * read_buffer = gridv->Data();
-    uint8_t* write_buffer = data.data();
-    memcpy( write_buffer, read_buffer, sizeof(cell_t) * size );
-
-    return true;
-}
-
-const std::byte* const TileNode::cache_write(){
-    // for 1k tiles (32x32) => 1072 bytes
-    // for 1M tiles (1024x1024) => 1048624 bytes
-    flatbuffers::FlatBufferBuilder builder(1100);
-
-    uint8_t* write_buffer;
-    auto grid = builder.CreateUninitializedVector( size, 1, &write_buffer);
-    
-    const uint8_t* read_buffer = data.data();
-    memcpy( write_buffer, read_buffer, sizeof(cell_t) * size ); 
-
-    auto tile = CreateTileCache( builder, anchor.x(), anchor.y(), grid);
-
-    builder.Finish(tile);
-    // cerr << "::on_finish::buffer.size= " << builder.GetSize() << endl;
-
-    uint8_t* buffer = builder.GetBufferPointer();
-    // builder.Clear(); // useful if/when the builder is re-used.
-
-    // because std::byte and uint8T _REALLY_ should be the same size.
-    static_assert( sizeof(uint8_t) == sizeof(std::byte) );
-    static_assert( sizeof(cell_t) == sizeof(std::byte) );
-    
-    return reinterpret_cast<std::byte*>(buffer);
-}
-
-TileNode::cell_t TileNode::classify(const Vector2d& p) const {
-    if( contains(p) ){
-        const Vector2d scaled = (p - anchor) * scale;
-        const size_t xi = static_cast<size_t>(scaled.x());
-        const size_t yi = static_cast<size_t>(scaled.y());
-        return index(xi,yi);
-    }
-
-    return cell_default_value;
-}
-
-bool TileNode::contains(const Vector2d& p) const {
-    const double x = p.x() - anchor.x();
-    if( (x < 0) || (width <= x) ){
-        return false;
-    }
-    
-    const double y = p.y() - anchor.y();
-    if( (y < 0) || (width <= y) ){
-        return false;
-    }
-
-    return true;
-}
-
-void TileNode::fill(const cell_t value){
-    memset( data.data(), value, sizeof(cell_t) * size );
-}
-
-void TileNode::fill(const std::vector<TileNode::cell_t>& source){
-    if( source.size() < data.size()){
-        return;
-    }
-
-    size_t read_index = 0;
-    for(size_t j = dimension-1; j < dimension; --j ){
-        for(size_t i = 0; i < dimension; ++i ){
-            index(i,j) = source[read_index];
-            ++read_index;
-        }
-    }
-}
-
-TileNode::cell_t& TileNode::get_cell(const size_t xi, const size_t yi) {
-    return index(xi,yi);
-}
-
-TileNode::cell_t TileNode::get_cell(const size_t xi, const size_t yi) const {
-    return index(xi,yi);
-}
-
-std::unique_ptr<TileNode> TileNode::make(const std::byte* const cache_buffer){
+std::unique_ptr<TileNode> TileNode::build_from_flatbuffer(const std::byte* const cache_buffer){
     const auto cache_loader = GetTileCache( cache_buffer );
     const double x = cache_loader->x();
     const double y = cache_loader->y();
@@ -145,12 +53,12 @@ std::unique_ptr<TileNode> TileNode::make(const std::byte* const cache_buffer){
 
     auto result = std::make_unique<TileNode>(Vector2d(x,y));
 
-    result->cache_read( cache_buffer );
+    result->load_from_flatbuffer( cache_buffer );
 
     return result;
 } 
 
-std::unique_ptr<TileNode> TileNode::make(const std::string& text){
+std::unique_ptr<TileNode> TileNode::build_from_json(const std::string& text){
     const nlohmann::json doc = nlohmann::json::parse( text,  // source document
                                                 nullptr,   // callback argument
                                                 false);    // allow exceptions?
@@ -212,6 +120,84 @@ std::unique_ptr<TileNode> TileNode::make(const std::string& text){
     return result;
 }
 
+TileNode::cell_t TileNode::classify(const Vector2d& p) const {
+    if( contains(p) ){
+        const Vector2d scaled = (p - anchor) * scale;
+        const size_t xi = static_cast<size_t>(scaled.x());
+        const size_t yi = static_cast<size_t>(scaled.y());
+        return index(xi,yi);
+    }
+
+    return cell_default_value;
+}
+
+bool TileNode::contains(const Vector2d& p) const {
+    const double x = p.x() - anchor.x();
+    if( (x < 0) || (width <= x) ){
+        return false;
+    }
+    
+    const double y = p.y() - anchor.y();
+    if( (y < 0) || (width <= y) ){
+        return false;
+    }
+
+    return true;
+}
+
+void TileNode::fill(const cell_t value){
+    memset( data.data(), value, sizeof(cell_t) * size );
+}
+
+void TileNode::fill(const std::vector<TileNode::cell_t>& source){
+    if( source.size() < data.size()){
+        return;
+    }
+
+    size_t read_index = 0;
+    for(size_t j = dimension-1; j < dimension; --j ){
+        for(size_t i = 0; i < dimension; ++i ){
+            index(i,j) = source[read_index];
+            ++read_index;
+        }
+    }
+}
+
+void TileNode::fill(const Polygon& poly, const cell_t fill_value){
+    yggdrasil::io::fill_from_polygon(*this, poly, fill_value);
+}
+
+const Bounds TileNode::get_bounds() const { 
+    return {anchor, anchor+Vector2d(width,width)};
+}
+
+TileNode::cell_t& TileNode::get_cell(const size_t xi, const size_t yi) {
+    return index(xi,yi);
+}
+
+TileNode::cell_t TileNode::get_cell(const size_t xi, const size_t yi) const {
+    return index(xi,yi);
+}
+
+bool TileNode::load_from_flatbuffer( const std::byte* const buffer){
+    auto tile_cache = GetTileCache( buffer );
+
+    const Eigen::Vector2d expected = { tile_cache->x(), tile_cache->y() };
+    if( ! expected.isApprox( anchor ) ){
+        return false;
+    }
+ 
+    auto gridv = tile_cache->grid();
+    if( gridv->size() != size ){
+        return false;
+    }
+    const uint8_t * read_buffer = gridv->Data();
+    uint8_t* write_buffer = data.data();
+    memcpy( write_buffer, read_buffer, sizeof(cell_t) * size );
+
+    return true;
+}
+
 bool TileNode::store(const Vector2d& p, const cell_t new_value){
     if( contains(p) ){
         const Vector2d scaled = (p - anchor) * scale;
@@ -245,8 +231,8 @@ std::string TileNode::to_json() const {
 
 std::string TileNode::to_string() const {
     std::ostringstream buf;
-
-    buf << " ======== ======== ======== Print Grid: ======== ======== ========\n";
+    static const std::string header("======== ======= ======= ======= ======= ======= ======= =======\n");
+    buf << header;
     for(size_t j = dimension-1; j < dimension; --j ){
         for(size_t i = 0; i < dimension; ++i ){
             const auto value = index(i,j);
@@ -259,7 +245,7 @@ std::string TileNode::to_string() const {
         }
         buf << endl;
     }
-    buf << " ======== ======== ======== ======== ======== ======== ========\n";
+    buf << header;
     
     return buf.str();
 }
@@ -282,6 +268,32 @@ vector<byte> TileNode::to_raster() const {
     }
 
     return buffer;
+}
+
+const std::byte* const TileNode::to_flatbuffer(){
+    // for 1k tiles (32x32) => 1072 bytes
+    // for 1M tiles (1024x1024) => 1048624 bytes
+    flatbuffers::FlatBufferBuilder builder(1100);
+
+    uint8_t* write_buffer;
+    auto grid = builder.CreateUninitializedVector( size, 1, &write_buffer);
+    
+    const uint8_t* read_buffer = data.data();
+    memcpy( write_buffer, read_buffer, sizeof(cell_t) * size ); 
+
+    auto tile = CreateTileCache( builder, anchor.x(), anchor.y(), grid);
+
+    builder.Finish(tile);
+    // cerr << "::on_finish::buffer.size= " << builder.GetSize() << endl;
+
+    uint8_t* buffer = builder.GetBufferPointer();
+    // builder.Clear(); // useful if/when the builder is re-used.
+
+    // because std::byte and uint8T _REALLY_ should be the same size.
+    static_assert( sizeof(uint8_t) == sizeof(std::byte) );
+    static_assert( sizeof(cell_t) == sizeof(std::byte) );
+    
+    return reinterpret_cast<std::byte*>(buffer);
 }
 
 // // Explicitly instantiate some common specializations:

@@ -21,11 +21,8 @@
 
 namespace yggdrasil::io {
 
-///! \brief generates a sample json document, used for creating debug yggdrasil
 template<typename target_t, typename cell_t>
-nlohmann::json generate_diamond(target_t& yggdrasil,
-                                const double width,
-                                const double desired_precision);
+void fill_from_polygon(target_t& t, const yggdrasil::geometry::Polygon& poly, const cell_t fill_value);
 
 ///! \brief loads a generic / unspecified json document from the given input stream
 ///! 

@@ -21,7 +21,6 @@ using std::string;
 using Eigen::Vector2d;
 using nlohmann::json;
 
-
 namespace yggdrasil::node {
 
 TEST(Tile, ConstructDefault) {
@@ -150,10 +149,9 @@ TEST(Tile, Classify){
     EXPECT_EQ( tile.classify({ 37.6, 37.6}),  42);
     EXPECT_EQ( tile.classify({ 37.,  37.}),   42);
     EXPECT_EQ( tile.classify({ 40.,  40.}),   42);
-
 }
 
-TEST(Tile, CacheRoundTrip) {
+TEST(Tile, FlatbufferRoundTrip) {
     ASSERT_EQ( sizeof(uint8_t), sizeof(std::byte) );
     ASSERT_EQ( sizeof(uint8_t*), sizeof(std::byte*) );
 
@@ -176,11 +174,11 @@ TEST(Tile, CacheRoundTrip) {
     }
 
     // target first half: write to cache
-    const std::byte* bufp = write_tile.cache_write();
-    EXPECT_NE( nullptr, bufp );
+    auto buf = write_tile.to_flatbuffer();
+    EXPECT_NE( nullptr, buf );
 
     // Perform intermediate tests on the buffer
-    auto tile_cache = GetTileCache( bufp );
+    auto tile_cache = GetTileCache( buf );
     EXPECT_NEAR( tile_cache->x(), 4.4, 1e-6);
     EXPECT_NEAR( tile_cache->y(), 4.6, 1e-6);
 
@@ -188,7 +186,7 @@ TEST(Tile, CacheRoundTrip) {
     // EXPECT_EQ( tile_cache->GetSize(), 1072);  // serialized size, including packing
 
     // target second half: write to cache
-    const auto read_tile = TileNode::make(bufp);
+    const auto read_tile = TileNode::build_from_flatbuffer( buf );
     ASSERT_TRUE( read_tile );  
 
     EXPECT_NEAR( read_tile->anchor.x(), 4.4, 1e-6);
@@ -232,7 +230,7 @@ TEST(Tile, JSONRoundTrip) {
     const std::string& buffer = write_tile.to_json();
 
     // target second half: write to cache
-    const auto read_tile = TileNode::make(buffer);
+    const auto read_tile = TileNode::build_from_json(buffer);
     ASSERT_TRUE( read_tile );  
 
     EXPECT_NEAR( read_tile->anchor.x(), 4.4, 1e-6);
@@ -250,29 +248,36 @@ TEST(Tile, JSONRoundTrip) {
     }
 }
 
-// TEST(Tile, LoadPolygonFromVector) {
-//     grid::Grid<cell_t,16> g({{8.,8.}, 8});
-//     Terrain terrain(g);
+TEST(Tile, LoadPolygonFromVector) {
+    TileNode tile;
+    EXPECT_DOUBLE_EQ( tile.anchor.x(),  0.);
+    EXPECT_DOUBLE_EQ( tile.anchor.y(),  0.);
 
-//     EXPECT_EQ( g.size(), 256);
-//     EXPECT_EQ( g.dim(),   16);
-//     EXPECT_EQ( g.width(),  8);
+    // reset grid
+    tile.fill(88); // == 'X'
 
-//     EXPECT_DOUBLE_EQ( terrain.get_precision(), 0.5);
+    Polygon shape = { {2,2}, {12,12}, {24,6}, {30,16}, {20,30}, {5,24}};
+    tile.fill(shape, 46); // == '.'
 
-//     const auto& layout = terrain.get_layout();
-//     EXPECT_DOUBLE_EQ( layout.center.x,    8.);
-//     EXPECT_DOUBLE_EQ( layout.center.y,    8.);
-//     EXPECT_DOUBLE_EQ( layout.half_width,  4.);
+    // // DEBUG
+    // cerr << tile.to_string() << endl;
 
-//     EXPECT_DOUBLE_EQ( layout.get_x_min(),   4.);
-//     EXPECT_DOUBLE_EQ( layout.get_y_min(),   4.);
-//     EXPECT_DOUBLE_EQ( layout.get_x_max(),  12.);
-//     EXPECT_DOUBLE_EQ( layout.get_y_max(),  12.);
+    EXPECT_EQ( tile.get_cell(  0,  0), 88);
+    EXPECT_EQ( tile.get_cell(  1,  1), 88);
+    EXPECT_EQ( tile.get_cell(  2,  2), 46);
+    EXPECT_EQ( tile.get_cell(  3,  3), 46);
+    EXPECT_EQ( tile.get_cell(  4,  4), 46);
 
-//     // reset grid
-//     g.fill(99);
+    EXPECT_EQ( tile.get_cell( 12, 10), 88);
+    EXPECT_EQ( tile.get_cell( 12, 11), 88);
+    EXPECT_EQ( tile.get_cell( 12, 12), 46);
+    EXPECT_EQ( tile.get_cell( 12, 13), 46);
+    EXPECT_EQ( tile.get_cell( 12, 14), 46);
 
+    // EXPECT_EQ( tile.get_cell( 9, 9), 88);
+    // EXPECT_EQ( tile.get_cell(15,15), 88);
+
+}
 
 TEST(Tile, ToPNG) {
     // step 1:
