@@ -13,11 +13,19 @@ Bounds::Bounds(){
 }
 
 Bounds::Bounds( const Vector2d& SW, const Vector2d& NE ): 
-    southwest(SW), northeast(NE)
+    southwest( std::min(SW.x(),NE.x()), std::min(SW.y(), NE.y()) ),
+    northeast( std::max(SW.x(),NE.x()), std::max(SW.y(), NE.y()) )
 {}
 
 Vector2d Bounds::anchor() const {
     return southwest;
+}
+double Bounds::constrain_x(const double value) const {
+    return std::max( southwest.x(), std::min( value, northeast.x() ));
+}
+
+double Bounds::constrain_y(const double value) const {
+    return std::max( southwest.y(), std::min( value, northeast.y() ));
 }
 
 Vector2d Bounds::max() const { 

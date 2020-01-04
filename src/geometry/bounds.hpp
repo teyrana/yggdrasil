@@ -16,14 +16,21 @@ public:
     Bounds();
     Bounds( const Vector2d& SW, const Vector2d& NE );
 
-    // synonym
     Vector2d anchor() const;
-    Vector2d max() const;
-    Vector2d min() const;
-    Vector2d size() const;
+
+    double constrain_x(const double value) const;
+
+    double constrain_y(const double value) const;
 
     void grow(const Vector2d& p);
+
+    Vector2d max() const;
+
+    Vector2d min() const;
+    
     void reset();
+
+    Vector2d size() const;
 
 }; // class Bounds
 
