@@ -93,6 +93,14 @@ void Polygon::enclose_polygon(){
     }
 }
 
+
+Polygon Polygon::make_diamond( const double width) {
+    return {{  width,      0},
+            {      0,  width},
+            { -width,      0},
+            {      0, -width}};
+}
+
 bool Polygon::is_right_handed() const {
     double sum = 0;
 
@@ -152,6 +160,10 @@ bool Polygon::load(nlohmann::json doc){
 
 const Bounds& Polygon::get_bounds() const {
     return bounds;
+}
+
+void Polygon::move(const Vector2d& delta){
+    std::for_each( points.begin(), points.end(), [&] (Vector2d& p) { p += delta;});
 }
 
 Vector2d& Polygon::operator[](const size_t index){

@@ -20,7 +20,7 @@ using yggdrasil::geometry::Polygon;
 
 namespace yggdrasil::geometry {
 
-TEST(PolygonTest, DefaultConfiguration) {
+TEST(Polygon, DefaultConfiguration) {
     const Polygon shape;
 
     const auto& points = shape.points;
@@ -30,7 +30,7 @@ TEST(PolygonTest, DefaultConfiguration) {
     ASSERT_TRUE(points[3].isApprox(Vector2d(0,1)));
 }
 
-TEST(PolygonTest, LoadList_5Point) {
+TEST(Polygon, LoadList_5Point) {
     // Note:  this polygen is configured as CW:
     //    it will be enclosed, and reversed, internally
     Polygon shape( {{ 3, 4},
@@ -50,7 +50,7 @@ TEST(PolygonTest, LoadList_5Point) {
     ASSERT_EQ( shape[5], Vector2d(  3,  4));
 }
 
-TEST(PolygonTest, LoadList_DiamondRhombus) {
+TEST(Polygon, LoadList_Diamond) {
     Polygon shape({{1,0},{0,1},{-1,0},{0,-1}});
 
     // // DEBUG
@@ -63,7 +63,43 @@ TEST(PolygonTest, LoadList_DiamondRhombus) {
     ASSERT_EQ( shape[4], Vector2d(1,0) );
 }
 
-TEST(PolygonTest, MakeBounds) {
+TEST(Polygon, GenerateDiamond) {
+    const auto shape = Polygon::make_diamond(1.);
+
+    // DEBUG
+    // shape.write_yaml(std::cerr, "    ");
+
+    ASSERT_EQ( shape.size(), 5);
+    ASSERT_EQ( shape[0], Vector2d(1,0) );
+    ASSERT_EQ( shape[1], Vector2d(0,1) );
+    ASSERT_EQ( shape[2], Vector2d(-1,0) );
+    ASSERT_EQ( shape[3], Vector2d(0,-1) );
+    ASSERT_EQ( shape[4], Vector2d(1,0) );
+}
+
+TEST(Polygon, Move) {
+    auto shape = Polygon::make_diamond(2.);
+    ASSERT_EQ( shape.size(), 5);
+
+    shape.move( {3,3} );
+
+    EXPECT_DOUBLE_EQ( shape[0].x(), 5);
+    EXPECT_DOUBLE_EQ( shape[0].y(), 3);
+
+    EXPECT_DOUBLE_EQ( shape[1].x(), 3);
+    EXPECT_DOUBLE_EQ( shape[1].y(), 5);
+
+    EXPECT_DOUBLE_EQ( shape[2].x(), 1);
+    EXPECT_DOUBLE_EQ( shape[2].y(), 3);
+
+    EXPECT_DOUBLE_EQ( shape[3].x(), 3);
+    EXPECT_DOUBLE_EQ( shape[3].y(), 1);
+
+    EXPECT_DOUBLE_EQ( shape[4].x(), 5);
+    EXPECT_DOUBLE_EQ( shape[4].y(), 3);
+}
+
+TEST(Polygon, MakeBounds) {
     Polygon shape( {{ 5, 6},
                     { 9, 5},
                     {12, 8},
@@ -81,10 +117,6 @@ TEST(PolygonTest, MakeBounds) {
     // derived
     EXPECT_DOUBLE_EQ(bounds.size().x(),  9.);
     EXPECT_DOUBLE_EQ(bounds.size().y(),  7.);
-
 }
-
-
-
 
 };  // namespace yggdrasil::geometry

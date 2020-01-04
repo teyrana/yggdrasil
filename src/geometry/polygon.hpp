@@ -26,9 +26,8 @@ public:
     Polygon(std::vector<Eigen::Vector2d>& init);
     Polygon(std::initializer_list<Eigen::Vector2d> init);
 
-    inline auto begin() const { return points.cbegin(); }
-    inline auto cbegin() const { return points.cbegin(); }
-
+    inline const auto begin() const { return points.cbegin(); }
+    
     ///! \brief when manually constructing a polygon, call this to ensure it format-matches
     void complete();
 
@@ -37,8 +36,9 @@ public:
 
     void emplace(const double x, const double y);
 
-    inline auto end() const { return points.cend(); }
-    inline auto cend() const { return points.cend(); }
+    inline const auto end() const { return points.cend(); }
+
+    static Polygon make_diamond( const double width );
 
     // Retrieves the precomputed center of the polygon:
     // Currently, this is a naive, unweighted average of the polygon points.
@@ -49,6 +49,8 @@ public:
     bool load(nlohmann::json doc);
 
     const Bounds& get_bounds() const;
+
+    void move(const Eigen::Vector2d& delta);
 
     Eigen::Vector2d& operator[](const size_t index);
 
@@ -87,15 +89,10 @@ protected: // Configuration parameters
     Bounds bounds;
 
 private:
-    friend class PolygonTest_DefaultConfiguration_Test;
-    friend class PolygonTest_LoadList_5Point_Test;
-    friend class PolygonTest_LoadList_DiamondRhombus_Test;
-    
-    // friend class PolygonTests_TestHandedness_Test;
-    // friend class PolygonTests_InBoundingBoxByX_Test;
-    // friend class PolygonTests_InConvexBoundariesByX_Test;
-    // friend class PolygonTests_InConcaveBoundariesByX_Test;
-    // friend class PolygonTests_InConcaveBoundariesByY_Test;
+    friend class Polygon_DefaultConfiguration_Test;
+    friend class Polygon_LoadList_5Point_Test;
+    // friend class Polygon_LoadList_Diamond_Test;
+
 };
 
 } // namespace yggdrasil::geometry
