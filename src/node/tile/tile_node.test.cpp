@@ -36,15 +36,17 @@ TEST(Tile, ConstructDefault) {
 }
 
 TEST(Tile, ConstructAtLocation) {
-    TileNode tile({6.,7.7});
+    const Vector2d anchor{ 754500, 2972000 };
+
+    TileNode tile( anchor );
 
     EXPECT_EQ( TileNode::size, 1024);
     EXPECT_EQ( TileNode::dimension, 32);
     EXPECT_DOUBLE_EQ( TileNode::scale,       1.);
     EXPECT_DOUBLE_EQ( TileNode::width,      32.);
 
-    EXPECT_DOUBLE_EQ( tile.anchor.x(),  6.0);
-    EXPECT_DOUBLE_EQ( tile.anchor.y(),  7.7);
+    EXPECT_DOUBLE_EQ( tile.anchor.x(), anchor.x() );
+    EXPECT_DOUBLE_EQ( tile.anchor.y(), anchor.y() );
 }
 
 static const Vector2d default_anchor = {4.4, 4.6};
@@ -276,20 +278,55 @@ TEST(Tile, LoadPolygonFromVector) {
 
     // EXPECT_EQ( tile.get_cell( 9, 9), 88);
     // EXPECT_EQ( tile.get_cell(15,15), 88);
-
 }
 
-TEST(Tile, ToPNG) {
-    // step 1:
-    TileNode tile(default_anchor);
-    tile.fill(default_tile_contents);
+TEST(Tile, LoadShapefile) {
+    // fyi, this is not a _great_ teste, because a single tile is small, compared to the whole map...
+    const Vector2d anchor{ 771635, 2961225 };
+    TileNode tile( anchor );
+
+    const string shapefile("data/Somerville/CityLimits.shp");
+
+    // vvvv test target vvvv
+    ASSERT_TRUE( tile.load_from_shapefile( shapefile ) );
+    // ^^^^ test target ^^^^
 
     // // DEBUG
-    // cerr << tile->to_string() << endl; // DEBUG
-    
-    // const std::vector<std::byte> data = tile->to_raster();
-    // const string outpath("test.tile.png");
-    // ASSERT_TRUE( yggdrasil::io::to_png( data, outpath ) );
+    // cerr << tile.to_string() << endl;
+
+    { // quickly test the loaded tile
+        EXPECT_EQ( tile.get_cell(  0,  0), 153);
+        EXPECT_EQ( tile.get_cell(  1,  1), 153);
+        EXPECT_EQ( tile.get_cell(  2,  2), 153);
+        EXPECT_EQ( tile.get_cell(  3,  3), 153);
+
+        EXPECT_EQ( tile.get_cell(  4,  4), 153);
+        EXPECT_EQ( tile.get_cell(  4,  5), 153);
+        EXPECT_EQ( tile.get_cell(  4,  6),   0);
+        EXPECT_EQ( tile.get_cell(  4,  7),   0);
+        EXPECT_EQ( tile.get_cell(  4,  8),   0);
+        EXPECT_EQ( tile.get_cell(  4,  9),   0);
+        EXPECT_EQ( tile.get_cell(  4, 10),   0);
+
+        EXPECT_EQ( tile.get_cell( 20, 15),   0);
+        EXPECT_EQ( tile.get_cell( 21, 15),   0);
+        EXPECT_EQ( tile.get_cell( 22, 15), 153);
+        EXPECT_EQ( tile.get_cell( 23, 15), 153);
+        EXPECT_EQ( tile.get_cell( 24, 15), 153);
+    }
 }
+
+// TEST(Tile, ToPNG) {
+//     // step 1:
+//     TileNode tile(default_anchor);
+//     tile.fill(default_tile_contents);
+
+//     // DEBUG
+//     cerr << tile->to_string() << endl; // DEBUG
+    
+//     const std::vector<std::byte> data = tile->to_raster();
+//     const string outpath("test.tile.png");
+//     ASSERT_TRUE( yggdrasil::io::to_png( data, outpath ) );
+// }
 
 }; // namespace yggdrasil::node

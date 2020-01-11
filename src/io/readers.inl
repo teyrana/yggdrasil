@@ -162,19 +162,34 @@ inline Polygon yggdrasil::io::_make_polygons_from_OGRLine( const OGRLinearRing& 
     return {};
 }
 
+#include <sys/stat.h>
+
 template<typename target_t, typename cell_t>
 bool yggdrasil::io::load_from_shape_file(target_t& target, const string& filepath){
     const cell_t allow_value = 0;
     const cell_t block_value = 0x99;
 
+    // might be a duplicate call, but duplicate calls don't seem to cause any problems.
+    GDALAllRegister();
+
     auto * source_dataset = (GDALDataset*) GDALOpenEx( filepath.c_str(), GDAL_OF_VECTOR, NULL, NULL, NULL );
     if( source_dataset == NULL ){
-        cerr << "!> Open failed. " << filepath << " into memory...\n";
+        cerr << "!> Open failed.  No source dataset available?\n";
+
+        struct stat buf;
+        if (stat(filepath.c_str(), &buf) != -1){
+            cerr << "    >> Found file: '" << filepath << "' >>\n";
+        }else{
+            cerr << "    !! Missing data file: '" << filepath << "' !!\n";
+        }
+
         return false;
     }
-    // // DEBUG
-    // cerr << "#> Loaded file: " << filepath << " into memory...\n";
-    // // DEBUG
+    
+    // DEBUG
+    // cerr << "#> Loaded file: '" << filepath << "' into memory...\n";
+
+    // DEBUG
     // for( auto * each_layer: source_dataset->GetLayers() ){
     //     GNMGenericLayer * each_gnm_layer = (GNMGenericLayer*)each_layer;
     //     cerr << "___?> Layer.Name: " << each_gnm_layer->GetName() << endl;
@@ -207,9 +222,6 @@ bool yggdrasil::io::load_from_shape_file(target_t& target, const string& filepat
         OGRPolygon* poly = geom->toPolygon();
         const Polygon& exterior = _make_polygons_from_OGRLine( * poly->getExteriorRing());
 
-        // target.reset( exterior.make_layout(16.) );
-        // cerr << "    .... loaded layout"  << t.get_layout().to_string() << endl;
-
         target.fill( block_value );
 
         //fprintf( stderr, "    .... loading exterior ring with %zu points.\n", exterior.size() );
@@ -241,7 +253,7 @@ bool yggdrasil::io::load_from_shape_file(target_t& target, const string& filepat
 
         OGRFeature::DestroyFeature(poly_feature);
     }
-    target.prune();
+    //target.prune();
 
     CLEANUP_LOAD_SHAPEFILE:
         GDALClose( source_dataset );

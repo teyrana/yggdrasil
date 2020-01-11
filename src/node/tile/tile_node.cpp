@@ -198,6 +198,10 @@ bool TileNode::load_from_flatbuffer( const std::byte* const buffer){
     return true;
 }
 
+bool TileNode::load_from_shapefile( const std::string& filepath){
+    return yggdrasil::io::load_from_shape_file<TileNode, TileNode::cell_t>(*this, filepath);
+}
+
 bool TileNode::store(const Vector2d& p, const cell_t new_value){
     if( contains(p) ){
         const Vector2d scaled = (p - anchor) * scale;

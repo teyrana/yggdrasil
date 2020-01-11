@@ -89,6 +89,9 @@ public:
     /// \brief used for loading a flatbuffer data structure
     bool load_from_flatbuffer( const std::byte* const buffer);
 
+    ///! \brief loads a .shp shapefile into this tile
+    bool load_from_shapefile( const std::string& path);
+
     inline void reset(){}
 
     // void set(const double x, const double y, const T new_value);
@@ -137,8 +140,9 @@ private:
 private:
     friend class Tile_CacheRoundTrip_Test;
     friend class Tile_LoadPolygonFromVector_Test;
+    friend class Tile_LoadShapefile_Test;
 
-}; // class Tile
+}; // class TileNode
 
 }; // namespace yggdrasil::node
 
