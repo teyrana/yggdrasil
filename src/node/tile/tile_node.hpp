@@ -32,27 +32,29 @@ using yggdrasil::geometry::Polygon;
 namespace yggdrasil::node {
 
 class TileNode {
-public:
+  public:
     typedef uint8_t cell_t;
 
     TileNode();
 
-     /**
-      * @param layout which this grid will represent
-      */
-    TileNode(const Eigen::Vector2d& anchor_minimum);
-    
     /**
-      *  Releases all memory associated with this quad tree.
-      */
+     * @param layout which this grid will represent
+     */
+    TileNode(const Eigen::Vector2d& anchor_minimum);
+
+    /**
+     *  Releases all memory associated with this quad tree.
+     */
     ~TileNode(){};
 
     /// \brief used for loading a flatbuffer data structure
-    static std::unique_ptr<TileNode> build_from_flatbuffer(const std::byte * const buffer);
+    static std::unique_ptr<TileNode>
+    build_from_flatbuffer(const std::byte* const buffer);
 
     ///! \brief loads a json document from the given buffer
-    ///! 
-    ///! Note: this json document may contain either polygons or a grid, and will be automatically loaded correctly
+    ///!
+    ///! Note: this json document may contain either polygons or a grid, and
+    ///! will be automatically loaded correctly
     static std::unique_ptr<TileNode> build_from_json(const std::string& buffer);
 
     ///! \brief retrieve the value at given world coordinate (x, y)
@@ -79,20 +81,20 @@ public:
     void fill(const std::vector<cell_t>& fill_data);
 
     ///! \brief Fills the _interior_ of the given polygon with the given value.
-    ///! 
-    ///! @param source - polygon defining the fill araea. Assumed to be closed, CCW, and non-intersecting
-    ///! @param fill_value -fill value for area
+    ///!
+    ///! @param source - polygon defining the fill araea. Assumed to be closed,
+    /// CCW, and non-intersecting ! @param fill_value -fill value for area
     void fill(const Polygon& source, const cell_t fill_value);
 
-    const geometry::Bounds get_bounds() const ;
+    const geometry::Bounds get_bounds() const;
 
     /// \brief used for loading a flatbuffer data structure
-    bool load_from_flatbuffer( const std::byte* const buffer);
+    bool load_from_flatbuffer(const std::byte* const buffer);
 
     ///! \brief loads a .shp shapefile into this tile
-    bool load_from_shapefile( const std::string& path);
+    bool load_from_shapefile(const std::string& path);
 
-    inline void reset(){}
+    inline void reset() {}
 
     // void set(const double x, const double y, const T new_value);
 
@@ -102,27 +104,27 @@ public:
     std::string to_json() const;
 
     std::string to_string() const;
-    
+
     std::vector<std::byte> to_raster() const;
 
     const std::byte* const to_flatbuffer();
 
-private:
+  private:
     cell_t& get_cell(const size_t xi, const size_t yi);
     cell_t get_cell(const size_t xi, const size_t yi) const;
 
-private:
+  private:
     // used for reading and write json documents:
     const static std::string anchor_key;
     const static std::string grid_key;
     const static std::string x_key;
     const static std::string y_key;
 
-public:
+  public:
     constexpr static cell_t cell_default_value = '*';
     constexpr static size_t dimension = 32;
     constexpr static double width = dimension;
-    constexpr static double scale = dimension/width;
+    constexpr static double scale = dimension / width;
 
     ///! \brief the _total_ number of cells in this grid === (width * height)
     constexpr static size_t size = dimension * dimension;
@@ -130,14 +132,14 @@ public:
     /// \brief === lower-left / minimum-value point.
     const Eigen::Vector2d anchor;
 
-private:
+  private:
     /// \brief contains the data for this tile
-    std::array< cell_t, size > data;
+    std::array<cell_t, size> data;
 
     /// \brief defines lookup method for data in this tile
     yggdrasil::geometry::index::RowMajorIndex<dimension, cell_t> index;
 
-private:
+  private:
     friend class Tile_CacheRoundTrip_Test;
     friend class Tile_LoadPolygonFromVector_Test;
     friend class Tile_LoadShapefile_Test;
@@ -146,5 +148,4 @@ private:
 
 }; // namespace yggdrasil::node
 
-
-#endif  // #ifdef _TILE_NODE_HPP_
+#endif // #ifdef _TILE_NODE_HPP_

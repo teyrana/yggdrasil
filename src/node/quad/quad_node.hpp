@@ -4,8 +4,8 @@
 
 #include <cstdint>
 #include <iostream>
-#include <string>
 #include <memory>
+#include <string>
 
 #include <nlohmann/json.hpp>
 
@@ -20,19 +20,20 @@ namespace yggdrasil::node {
 class TileNode;
 
 class QuadNode {
-    enum Quadrant {NW, NE, SW, SE};
-    typedef union{
+    enum Quadrant { NW, NE, SW, SE };
+    typedef union {
         std::unique_ptr<QuadNode> quad;
         std::unique_ptr<TileNode> tile;
     } child_t;
 
-public:
+  public:
     QuadNode();
     // QuadNode(const cell_value_t value);
 
     ~QuadNode();
 
-    void draw(std::ostream& sink, const std::string& prefix, const std::string& as, const bool show_pointers) const;
+    void draw(std::ostream& sink, const std::string& prefix,
+              const std::string& as, const bool show_pointers) const;
 
     void fill(const cell_value_t fill_value);
 
@@ -52,7 +53,7 @@ public:
 
     bool operator==(const QuadNode& other) const;
 
-    ///! \brief coalesce groups of leaf nodes with identice values (for some value of "identical")
+    ///! \brief coalesce leaf nodes that have the same value
     void prune();
 
     void split(const double precision, const double width);
@@ -67,27 +68,27 @@ public:
 
     std::string to_string() const;
 
-private:
+  private:
     void split();
 
-private:
+  private:
     // By design, any given node will only cantain (a) children or (b) a value.
-    // => If the following uptr, `northeast` has a value, the union will contain pointers.
+    // => If the following uptr, `northeast` has a value, the union will contain
+    // pointers.
     // => if 'northeast' is empty / null => the union contains leaf-node-values
     // defined in CCW order:  NE -> NW -> SW -> SE
-    std::unique_ptr<QuadNode> northeast; //ne;
-    std::unique_ptr<QuadNode> northwest; //nw;
-    std::unique_ptr<QuadNode> southwest; //sw;
-    std::unique_ptr<QuadNode> southeast; //se;
+    std::unique_ptr<QuadNode> northeast; // ne;
+    std::unique_ptr<QuadNode> northwest; // nw;
+    std::unique_ptr<QuadNode> southwest; // sw;
+    std::unique_ptr<QuadNode> southeast; // se;
 
     std::unique_ptr<TileNode> value;
 
-private:
+  private:
     friend class QuadNodeTest_ConstructDefault_Test;
     friend class QuadNodeTest_ConstructWithValue_Test;
     friend class QuadNodeTest_SetGet_Test;
     friend class QuadNodeTest_SplitNodeImperative_Test;
-
 };
 
 } // namespace yggdrasil::node

@@ -13,13 +13,12 @@ using Eigen::Vector2d;
 
 namespace yggdrasil::geometry {
 
+template <size_t d, size_t w> class Square {
+  public:
+    constexpr Square() : precision(1), x(0), y(0), width(1) {}
 
-template<size_t d, size_t w>
-class Square {
-public:
-    constexpr Square(): precision(1), x(0), y(0), width(1) {}
-
-    constexpr Square(const double _precision, const double _x, const double _y, const double _width);
+    constexpr Square(const double _precision, const double _x, const double _y,
+                     const double _width);
 
     // definitely _not_ constexpr ;)
     Square(nlohmann::json& doc);
@@ -30,9 +29,9 @@ public:
     bool operator==(const Square& other) const;
 
     void clear();
-    
+
     const Vector2d get_anchor() const;
-    inline Vector2d get_center() const { return { x_c, y_c}; }
+    inline Vector2d get_center() const { return {x_c, y_c}; }
     inline size_t get_dimension() const { return dimension; }
     inline uint8_t get_padding() const { return padding; }
     inline double get_precision() const { return precision; }
@@ -53,16 +52,13 @@ public:
 
     std::string to_string() const;
 
-private: // member variables
+  private: // member variables
     const size_t dimension;
     const double width;
     const struct _c {
-	double x;
-	double y;
+        double x;
+        double y;
     } center;
 };
-
-
-
 
 #endif // #ifdef _SQUARE_HPP_

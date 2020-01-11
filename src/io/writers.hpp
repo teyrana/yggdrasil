@@ -13,14 +13,14 @@
 
 #include "io/json.hpp"
 
-
 namespace yggdrasil::io {
 
 #ifdef ENABLE_GDAL
 ///! \brief writes a png file to the given outstream
-bool to_grayscale_png(const std::vector<std::byte>& source, const std::string& filename);
-#endif 
+bool to_grayscale_png(const std::vector<std::byte>& source,
+                      const std::string& filename);
+#endif
 
 }; // namespace yggdrasil::io
 
-#endif  // #ifdef _YGGDRASIL_WRITERS_HPP_
+#endif // #ifdef _YGGDRASIL_WRITERS_HPP_

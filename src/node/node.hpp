@@ -15,13 +15,11 @@
 #include "geometry/layout.hpp"
 #include "geometry/polygon.hpp"
 
-
 namespace yggdrasil::node {
 
 ///! \brief defines a template interface for all nodes in the world tree.
-template<typename T>
-class yggdrasil {
-public:
+template <typename T> class yggdrasil {
+  public:
     T& impl;
     std::string error_message;
 
@@ -29,16 +27,16 @@ public:
 
     yggdrasil(T& _ref);
 
-    //copy constructor
+    // copy constructor
     yggdrasil(const yggdrasil& t) = delete;
 
-    //move constructor
+    // move constructor
     yggdrasil(yggdrasil&& t) = delete;
 
     // copy assignment operator
     yggdrasil& operator=(const yggdrasil& t) = delete;
 
-    //move assignment operator
+    // move assignment operator
     yggdrasil& operator=(yggdrasil&& t) = delete;
 
     ~yggdrasil();
@@ -56,12 +54,14 @@ public:
      *
      * @param {std::istream} input stream containing the serialization text
      */
-    void inline fill(const geometry::Polygon& source, const geometry::cell_value_t fill_value);
+    void inline fill(const geometry::Polygon& source,
+                     const geometry::cell_value_t fill_value);
 
     ///! \brief counts the number of cells *actually* tracked
     size_t get_count() const;
 
-    ///! \brief describes the number of divisions along each of the x, y dimensions
+    ///! \brief describes the number of divisions along each of the x, y
+    /// dimensions
     size_t get_dimension() const;
 
     const std::string& get_error() const;
@@ -89,4 +89,4 @@ public:
 
 #include "yggdrasil.inl"
 
-#endif  // #ifdef _NODE_HPP_
+#endif // #ifdef _NODE_HPP_

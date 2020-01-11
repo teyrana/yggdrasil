@@ -9,13 +9,12 @@
 
 namespace yggdrasil::geometry {
 
-template <typename cell_value_t>
-struct Sample {
-public:
+template <typename cell_value_t> struct Sample {
+  public:
     const Eigen::Vector2d at;
     const cell_value_t is;
 };
 
-} // namespace yggdrasil
+} // namespace yggdrasil::geometry
 
 #endif // _SAMPLE_HPP_

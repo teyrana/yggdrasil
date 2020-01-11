@@ -19,7 +19,7 @@
 namespace yggdrasil::geometry {
 
 class Polygon {
-public:
+  public:
     Polygon();
     Polygon(size_t initial_capacity);
     Polygon(nlohmann::json doc);
@@ -27,8 +27,9 @@ public:
     Polygon(std::initializer_list<Eigen::Vector2d> init);
 
     inline const auto begin() const { return points.cbegin(); }
-    
-    ///! \brief when manually constructing a polygon, call this to ensure it format-matches
+
+    ///! \brief when manually constructing a polygon, call this to ensure it
+    /// format-matches
     void complete();
 
     // clears the internal point vector
@@ -38,11 +39,11 @@ public:
 
     inline const auto end() const { return points.cend(); }
 
-    static Polygon make_diamond( const double width );
+    static Polygon make_diamond(const double width);
 
     // Retrieves the precomputed center of the polygon:
     // Currently, this is a naive, unweighted average of the polygon points.
-    // \return was the load successful? 
+    // \return was the load successful?
     // \sidef
     bool load(std::vector<Eigen::Vector2d> source);
 
@@ -57,18 +58,19 @@ public:
     const Eigen::Vector2d& operator[](const size_t index) const;
 
     void push_back(const Eigen::Vector2d p);
-    void resize( size_t capacity);
+    void resize(size_t capacity);
     size_t size() const;
-    
+
     // dumps the contains points to stderr
     // \param title - text to print in the output header
     // \param pts - set of points to dump
-    void write_yaml(std::ostream& sink, std::string indent="") const; 
+    void write_yaml(std::ostream& sink, std::string indent = "") const;
 
-protected:
-
-    // if necessary, adds an extra point to the end of the polygon-point vector to wrap it back to the first point.
-    // this is not strictly operationally necessary, but it simplifies most of the algorithms that need to iterate over the points.
+  protected:
+    // if necessary, adds an extra point to the end of the polygon-point vector
+    // to wrap it back to the first point. this is not strictly operationally
+    // necessary, but it simplifies most of the algorithms that need to iterate
+    // over the points.
     void enclose_polygon();
 
     // \brief isRightHanded()
@@ -84,17 +86,18 @@ protected:
 
     void recalculate_bounding_box();
 
-protected: // Configuration parameters
-    std::vector<Eigen::Vector2d> points;    ///< Main data store for this class.  Contains the vertices of the polygon
+  protected: // Configuration parameters
+    std::vector<Eigen::Vector2d>
+        points; ///< Main data store for this class.
+                ///< Contains the vertices of the polygon
     Bounds bounds;
 
-private:
+  private:
     friend class Polygon_DefaultConfiguration_Test;
     friend class Polygon_LoadList_5Point_Test;
     // friend class Polygon_LoadList_Diamond_Test;
-
 };
 
 } // namespace yggdrasil::geometry
 
-#endif  // #endif _GEOMETRY_POLYGON_HPP_
+#endif // #endif _GEOMETRY_POLYGON_HPP_

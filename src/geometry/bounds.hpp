@@ -12,9 +12,9 @@ class Bounds {
     Vector2d southwest;
     Vector2d northeast;
 
-public:
+  public:
     Bounds();
-    Bounds( const Vector2d& SW, const Vector2d& NE );
+    Bounds(const Vector2d& SW, const Vector2d& NE);
 
     Vector2d anchor() const;
 
@@ -27,12 +27,12 @@ public:
     Vector2d max() const;
 
     Vector2d min() const;
-    
+
     void reset();
 
     Vector2d size() const;
 
 }; // class Bounds
 
-}; // namespace yggdrasil::geometry
+};     // namespace yggdrasil::geometry
 #endif // #ifndef _BOUNDING_BOX_HPP_

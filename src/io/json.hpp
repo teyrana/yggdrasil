@@ -15,5 +15,4 @@ inline const std::string tree_key("tree");
 
 } // namespace yggdrasil
 
-
 #endif // #ifndef _YGGDRASIL_IO_JSON_HPP_
