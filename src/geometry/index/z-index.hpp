@@ -1,7 +1,9 @@
 // GPL v3 (c) 2020
 
-#ifndef _INDEX_HPP_
-#define _INDEX_HPP_
+#ifndef _Z_INDEX_HPP_
+#define _Z_INDEX_HPP_
+
+#include "typedef.hpp"
 
 namespace yggdrasil::geometry::index {
 
@@ -38,4 +40,4 @@ class ZOrderCurveIndex {
 
 #include "z-index.inl"
 
-#endif // #ifdef _GEOMETRY_INDEX_HPP_
+#endif // #ifdef _Z_INDEX_HPP_

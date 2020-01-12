@@ -8,6 +8,7 @@
 #include "gtest/gtest.h"
 
 #include "row-index.hpp"
+using yggdrasil::geometry::index::Index2u;
 using yggdrasil::geometry::index::RowMajorIndex;
 
 using std::cerr;
@@ -18,7 +19,7 @@ typedef uint8_t cell_t;
 typedef std::array<cell_t, 16> array_t;
 typedef std::vector<cell_t> vector_t;
 
-TEST(RowMajorIndex, IndexByRowMajor) {
+TEST(RowMajorIndex, IndexByUInt32) {
     array_t initial_grid = {0, 1, 2,  3,  4,  5,  6,  7,
                             8, 9, 10, 11, 12, 13, 14, 15};
 
@@ -43,6 +44,21 @@ TEST(RowMajorIndex, IndexByRowMajor) {
     ASSERT_EQ(index(1, 3), 13);
     ASSERT_EQ(index(2, 3), 14);
     ASSERT_EQ(index(3, 3), 15);
+}
+
+TEST(RowMajorIndex, IndexWithIndex2u) {
+    array_t initial_grid = {0, 1, 2,  3,  4,  5,  6,  7,
+                            8, 9, 10, 11, 12, 13, 14, 15};
+
+    const RowMajorIndex<4, cell_t> index(initial_grid);
+
+    // and again, with the Index2u type:
+    Index2u i(0, 3);
+    ASSERT_EQ(index(i), 12);
+    i[0] = 1;
+    ASSERT_EQ(index(i), 13);
+    // ASSERT_EQ(index( {2,3} ), 14);
+    // ASSERT_EQ(index( {3,3} ), 15);
 }
 
 TEST(RowMajorIndex, IndexByRowMajorModifyArray) {

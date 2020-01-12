@@ -1,7 +1,9 @@
 // GPL v3 (c) 2020
 
-#ifndef _INDEX_HPP_
-#define _INDEX_HPP_
+#ifndef _ROW_INDEX_HPP_
+#define _ROW_INDEX_HPP_
+
+#include "typedef.hpp"
 
 namespace yggdrasil::geometry::index {
 
@@ -20,9 +22,18 @@ class RowMajorIndex {
     constexpr cell_t& operator()(const uint32_t i, const uint32_t j) {
         return store[i + (j * dimension)];
     }
-    constexpr const cell_t& operator()(const uint32_t i,
+
+    constexpr cell_t& operator()(const Index2u& i) {
+        return store[i[0] + (i[1] * dimension)];
+    }
+
+    constexpr const cell_t operator()(const uint32_t i,
                                        const uint32_t j) const {
         return store[i + (j * dimension)];
+    }
+
+    constexpr const cell_t operator()(const Index2u& i) const {
+        return store[i[0] + (i[1] * dimension)];
     }
 
   private:
@@ -31,4 +42,4 @@ class RowMajorIndex {
 
 } // namespace yggdrasil::geometry::index
 
-#endif // #ifdef _GEOMETRY_INDEX_HPP_
+#endif // #ifdef _ROW_INDEX_HPP_
