@@ -65,7 +65,7 @@ SET(LIB_HEADERS
                 src/io/readers.hpp src/io/readers.inl
                 src/io/writers.hpp
                 # src/node/quad_node.hpp
-                src/node/tile/tile_node.hpp
+                src/node/tile_node.hpp
                 # src/quadtree/tree.hpp
                 # include/world_tree.hpp
                 )
@@ -75,7 +75,7 @@ SET(LIB_SOURCES
                 src/geometry/polygon.cpp
                 src/io/writers.cpp
                 # src/node/quad/quad_node.cpp
-                src/node/tile/tile_node.cpp
+                src/node/tile_node.cpp
                 # src/quadtree/tree.cpp
                 )
 
@@ -103,7 +103,7 @@ SET(TEST_SOURCES
                     src/geometry/interpolate.test.cpp
                     src/geometry/polygon.test.cpp
                     # src/node/quad_node.cpp
-                    src/node/tile/tile_node.test.cpp
+                    src/node/tile_node.test.cpp
                     # src/quadtree/tree.cpp
                     )
 

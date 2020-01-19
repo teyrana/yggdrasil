@@ -31,10 +31,8 @@ using yggdrasil::geometry::Polygon;
 
 namespace yggdrasil::node {
 
-class TileNode {
+template <typename cell_t, size_t dimension> class TileNode {
   public:
-    typedef uint8_t cell_t;
-
     TileNode();
 
     /**
@@ -121,8 +119,8 @@ class TileNode {
     const static std::string y_key;
 
   public:
-    constexpr static cell_t cell_default_value = '*';
-    constexpr static size_t dimension = 32;
+    constexpr static cell_t cell_default_value = 42; // == '*'
+
     constexpr static double width = dimension;
     constexpr static double scale = dimension / width;
 
@@ -145,6 +143,11 @@ class TileNode {
     friend class Tile_LoadShapefile_Test;
 
 }; // class TileNode
+
+// All typedefs declared here have an explicit template specialization
+// in the corresponding source file
+typedef TileNode<uint8_t, 32> Tile1k;
+typedef TileNode<uint8_t, 1024> Tile1M;
 
 }; // namespace yggdrasil::node
 

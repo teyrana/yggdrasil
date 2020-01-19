@@ -1,4 +1,4 @@
-// // GPL v3 (c) 2020
+// GPL v3 (c) 2020
 
 #include <iostream>
 #include <sstream>
@@ -28,31 +28,41 @@ using yggdrasil::geometry::Bounds;
 
 namespace yggdrasil::node {
 
-const std::string TileNode::anchor_key = "anchor";
-const std::string TileNode::grid_key = "grid";
-const std::string TileNode::x_key = "x";
-const std::string TileNode::y_key = "y";
+template <typename cell_t, size_t dimension>
+const std::string TileNode<cell_t, dimension>::anchor_key = "anchor";
+template <typename cell_t, size_t dimension>
+const std::string TileNode<cell_t, dimension>::grid_key = "grid";
+template <typename cell_t, size_t dimension>
+const std::string TileNode<cell_t, dimension>::x_key = "x";
+template <typename cell_t, size_t dimension>
+const std::string TileNode<cell_t, dimension>::y_key = "y";
 
-TileNode::TileNode() : anchor({0., 0.}), index(data) {}
+template <typename cell_t, size_t dimension>
+TileNode<cell_t, dimension>::TileNode()
+    : anchor(Vector2d(0., 0.)), index(data) {}
 
-TileNode::TileNode(const Vector2d& _anchor) : anchor(_anchor), index(data) {}
+template <typename cell_t, size_t dimension>
+TileNode<cell_t, dimension>::TileNode(const Vector2d& _anchor)
+    : anchor(_anchor), index(data) {}
 
-std::unique_ptr<TileNode>
-TileNode::build_from_flatbuffer(const std::byte* const cache_buffer) {
+template <typename cell_t, size_t dimension>
+std::unique_ptr<TileNode<cell_t, dimension>>
+TileNode<cell_t, dimension>::build_from_flatbuffer(
+    const std::byte* const cache_buffer) {
     const auto cache_loader = GetTileCache(cache_buffer);
     const double x = cache_loader->x();
     const double y = cache_loader->y();
 
-    std::unique_ptr<TileNode> result0 = std::make_unique<TileNode>();
-
-    auto result = std::make_unique<TileNode>(Vector2d(x, y));
+    auto result = std::make_unique<TileNode<cell_t, dimension>>(Vector2d(x, y));
 
     result->load_from_flatbuffer(cache_buffer);
 
     return result;
 }
 
-std::unique_ptr<TileNode> TileNode::build_from_json(const std::string& text) {
+template <typename cell_t, size_t dimension>
+std::unique_ptr<TileNode<cell_t, dimension>>
+TileNode<cell_t, dimension>::build_from_json(const std::string& text) {
     const nlohmann::json doc =
         nlohmann::json::parse(text,    // source document
                               nullptr, // callback argument
@@ -70,12 +80,12 @@ std::unique_ptr<TileNode> TileNode::build_from_json(const std::string& text) {
     }
     const auto anchor_object = doc[anchor_key];
 
-    if (!anchor_object.contains(TileNode::x_key) ||
-        !anchor_object[TileNode::x_key].is_number()) {
+    if (!anchor_object.contains(TileNode<cell_t, dimension>::x_key) ||
+        !anchor_object[TileNode<cell_t, dimension>::x_key].is_number()) {
         cerr << "input document is missing the anchor.x field! \n";
         return {};
-    } else if (!anchor_object.contains(TileNode::y_key) ||
-               !anchor_object[TileNode::y_key].is_number()) {
+    } else if (!anchor_object.contains(TileNode<cell_t, dimension>::y_key) ||
+               !anchor_object[TileNode<cell_t, dimension>::y_key].is_number()) {
         cerr << "input document is missing the anchor.y field! \n";
         return {};
     }
@@ -111,8 +121,7 @@ std::unique_ptr<TileNode> TileNode::build_from_json(const std::string& text) {
             size_t column_index = 0;
             // i.e. a cell is the element at [column_index, row_index] <=> [x,y]
             for (auto& cell : row) {
-                result->index(column_index, row_index) =
-                    cell.get<TileNode::cell_t>();
+                result->index(column_index, row_index) = cell.get<cell_t>();
                 ++column_index;
             }
             --row_index;
@@ -122,7 +131,8 @@ std::unique_ptr<TileNode> TileNode::build_from_json(const std::string& text) {
     return result;
 }
 
-TileNode::cell_t TileNode::classify(const Vector2d& p) const {
+template <typename cell_t, size_t dimension>
+cell_t TileNode<cell_t, dimension>::classify(const Vector2d& p) const {
     if (contains(p)) {
         const Vector2d scaled = (p - anchor) * scale;
         const size_t xi = static_cast<size_t>(scaled.x());
@@ -133,7 +143,8 @@ TileNode::cell_t TileNode::classify(const Vector2d& p) const {
     return cell_default_value;
 }
 
-bool TileNode::contains(const Vector2d& p) const {
+template <typename cell_t, size_t dimension>
+bool TileNode<cell_t, dimension>::contains(const Vector2d& p) const {
     const double x = p.x() - anchor.x();
     if ((x < 0) || (width <= x)) {
         return false;
@@ -147,11 +158,13 @@ bool TileNode::contains(const Vector2d& p) const {
     return true;
 }
 
-void TileNode::fill(const cell_t value) {
+template <typename cell_t, size_t dimension>
+void TileNode<cell_t, dimension>::fill(const cell_t value) {
     memset(data.data(), value, sizeof(cell_t) * size);
 }
 
-void TileNode::fill(const std::vector<TileNode::cell_t>& source) {
+template <typename cell_t, size_t dimension>
+void TileNode<cell_t, dimension>::fill(const std::vector<cell_t>& source) {
     if (source.size() < data.size()) {
         return;
     }
@@ -165,23 +178,32 @@ void TileNode::fill(const std::vector<TileNode::cell_t>& source) {
     }
 }
 
-void TileNode::fill(const Polygon& poly, const cell_t fill_value) {
+template <typename cell_t, size_t dimension>
+void TileNode<cell_t, dimension>::fill(const Polygon& poly,
+                                       const cell_t fill_value) {
     yggdrasil::io::fill_from_polygon(*this, poly, fill_value);
 }
 
-const Bounds TileNode::get_bounds() const {
+template <typename cell_t, size_t dimension>
+const Bounds TileNode<cell_t, dimension>::get_bounds() const {
     return {anchor, anchor + Vector2d(width, width)};
 }
 
-TileNode::cell_t& TileNode::get_cell(const size_t xi, const size_t yi) {
+template <typename cell_t, size_t dimension>
+cell_t& TileNode<cell_t, dimension>::get_cell(const size_t xi,
+                                              const size_t yi) {
     return index(xi, yi);
 }
 
-TileNode::cell_t TileNode::get_cell(const size_t xi, const size_t yi) const {
+template <typename cell_t, size_t dimension>
+cell_t TileNode<cell_t, dimension>::get_cell(const size_t xi,
+                                             const size_t yi) const {
     return index(xi, yi);
 }
 
-bool TileNode::load_from_flatbuffer(const std::byte* const buffer) {
+template <typename cell_t, size_t dimension>
+bool TileNode<cell_t, dimension>::load_from_flatbuffer(
+    const std::byte* const buffer) {
     auto tile_cache = GetTileCache(buffer);
 
     const Eigen::Vector2d expected = {tile_cache->x(), tile_cache->y()};
@@ -200,12 +222,16 @@ bool TileNode::load_from_flatbuffer(const std::byte* const buffer) {
     return true;
 }
 
-bool TileNode::load_from_shapefile(const std::string& filepath) {
-    return yggdrasil::io::load_from_shape_file<TileNode, TileNode::cell_t>(
-        *this, filepath);
+template <typename cell_t, size_t dimension>
+bool TileNode<cell_t, dimension>::load_from_shapefile(
+    const std::string& filepath) {
+    return yggdrasil::io::load_from_shape_file<TileNode, cell_t>(*this,
+                                                                 filepath);
 }
 
-bool TileNode::store(const Vector2d& p, const cell_t new_value) {
+template <typename cell_t, size_t dimension>
+bool TileNode<cell_t, dimension>::store(const Vector2d& p,
+                                        const cell_t new_value) {
     if (contains(p)) {
         const Vector2d scaled = (p - anchor) * scale;
         const size_t xi = static_cast<size_t>(scaled.x());
@@ -217,7 +243,8 @@ bool TileNode::store(const Vector2d& p, const cell_t new_value) {
     return false;
 }
 
-std::string TileNode::to_json() const {
+template <typename cell_t, size_t dimension>
+std::string TileNode<cell_t, dimension>::to_json() const {
 
     // explicitly create the json object
     nlohmann::json doc = nlohmann::json::object();
@@ -236,7 +263,8 @@ std::string TileNode::to_json() const {
     return doc.dump();
 }
 
-std::string TileNode::to_string() const {
+template <typename cell_t, size_t dimension>
+std::string TileNode<cell_t, dimension>::to_string() const {
     std::ostringstream buf;
     static const std::string header(
         "======== ======= ======= ======= ======= ======= ======= =======\n");
@@ -258,7 +286,8 @@ std::string TileNode::to_string() const {
     return buf.str();
 }
 
-vector<byte> TileNode::to_raster() const {
+template <typename cell_t, size_t dimension>
+vector<byte> TileNode<cell_t, dimension>::to_raster() const {
     // allocate data buffers
     vector<byte> buffer(size);
 
@@ -278,7 +307,8 @@ vector<byte> TileNode::to_raster() const {
     return buffer;
 }
 
-const std::byte* const TileNode::to_flatbuffer() {
+template <typename cell_t, size_t dimension>
+const std::byte* const TileNode<cell_t, dimension>::to_flatbuffer() {
     // for 1k tiles (32x32) => 1072 bytes
     // for 1M tiles (1024x1024) => 1048624 bytes
     flatbuffers::FlatBufferBuilder builder(1100);
@@ -304,12 +334,12 @@ const std::byte* const TileNode::to_flatbuffer() {
     return reinterpret_cast<std::byte*>(buffer);
 }
 
-// // Explicitly instantiate some common specializations:
-// // ===========
-// // this should match the Tile1k type:
-// template class TileNode<cell_t, 32>;
+// Explicitly instantiate some type
+// ===========
+// this should match the Tile1k type:
+template class TileNode<uint8_t, 32>;
 
 // // this should match the Tile1M type:
-// template class TileNode<cell_t, 1024>;
+template class TileNode<uint8_t, 1024>;
 
 }; // namespace yggdrasil::node

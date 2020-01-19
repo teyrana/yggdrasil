@@ -23,13 +23,33 @@ using nlohmann::json;
 
 namespace yggdrasil::node {
 
-TEST(Tile, ConstructDefault) {
-    TileNode tile;
+TEST(Tile, ConstructDefault1k) {
+    EXPECT_EQ(Tile1k::size, 1024);
+    EXPECT_DOUBLE_EQ(Tile1k::scale, 1.);
+    EXPECT_DOUBLE_EQ(Tile1k::width, 32.);
 
-    EXPECT_EQ(TileNode::size, 1024);
-    EXPECT_EQ(TileNode::dimension, 32);
-    EXPECT_DOUBLE_EQ(TileNode::scale, 1.);
-    EXPECT_DOUBLE_EQ(TileNode::width, 32.);
+    Tile1k tile;
+
+    EXPECT_EQ(tile.size, 1024);
+    // Not available as a member -- static or instance.
+    // EXPECT_EQ(tile.dimension, 32);
+    EXPECT_DOUBLE_EQ(tile.scale, 1.);
+    EXPECT_DOUBLE_EQ(tile.width, 32.);
+
+    EXPECT_DOUBLE_EQ(tile.anchor.x(), 0.);
+    EXPECT_DOUBLE_EQ(tile.anchor.y(), 0.);
+}
+
+TEST(Tile, ConstructDefault1M) {
+    EXPECT_EQ(Tile1M::size, 1048576);
+    EXPECT_DOUBLE_EQ(Tile1M::scale, 1.);
+    EXPECT_DOUBLE_EQ(Tile1M::width, 1024.);
+
+    Tile1M tile;
+
+    EXPECT_EQ(tile.size, 1048576);
+    EXPECT_DOUBLE_EQ(tile.scale, 1.);
+    EXPECT_DOUBLE_EQ(tile.width, 1024.);
 
     EXPECT_DOUBLE_EQ(tile.anchor.x(), 0.);
     EXPECT_DOUBLE_EQ(tile.anchor.y(), 0.);
@@ -38,19 +58,18 @@ TEST(Tile, ConstructDefault) {
 TEST(Tile, ConstructAtLocation) {
     const Vector2d anchor{754500, 2972000};
 
-    TileNode tile(anchor);
+    Tile1k tile(anchor);
 
-    EXPECT_EQ(TileNode::size, 1024);
-    EXPECT_EQ(TileNode::dimension, 32);
-    EXPECT_DOUBLE_EQ(TileNode::scale, 1.);
-    EXPECT_DOUBLE_EQ(TileNode::width, 32.);
+    EXPECT_EQ(tile.size, 1024);
+    EXPECT_DOUBLE_EQ(tile.scale, 1.);
+    EXPECT_DOUBLE_EQ(tile.width, 32.);
 
     EXPECT_DOUBLE_EQ(tile.anchor.x(), anchor.x());
     EXPECT_DOUBLE_EQ(tile.anchor.y(), anchor.y());
 }
 
 static const Vector2d default_anchor = {4.4, 4.6};
-static const std::vector<TileNode::cell_t> default_tile_contents = {
+static const std::vector<uint8_t> default_tile_contents = {
     66, 67, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
     99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 68, 69, 65, 99, 99, 99, 99, 99,
     99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99,
@@ -108,7 +127,7 @@ static const std::vector<TileNode::cell_t> default_tile_contents = {
 
 TEST(Tile, ContainsPoints) {
     // step 1:
-    TileNode tile(default_anchor);
+    Tile1k tile(default_anchor);
     tile.fill(default_tile_contents);
 
     // cerr << tile.to_string() << endl; // DEBUG
@@ -139,7 +158,7 @@ TEST(Tile, ContainsPoints) {
 }
 
 TEST(Tile, Classify) {
-    TileNode tile(default_anchor);
+    Tile1k tile(default_anchor);
     tile.fill(default_tile_contents);
 
     // cerr << tile.to_string() << endl; // DEBUG
@@ -179,7 +198,7 @@ TEST(Tile, FlatbufferRoundTrip) {
     ASSERT_EQ(sizeof(uint8_t*), sizeof(std::byte*));
 
     // step 1:
-    TileNode write_tile(default_anchor);
+    Tile1k write_tile(default_anchor);
     write_tile.fill(default_tile_contents);
 
     // // DEBUG
@@ -210,7 +229,7 @@ TEST(Tile, FlatbufferRoundTrip) {
     // serialized size, including packing
 
     // target second half: write to cache
-    const auto read_tile = TileNode::build_from_flatbuffer(buf);
+    const auto read_tile = Tile1k::build_from_flatbuffer(buf);
     ASSERT_TRUE(read_tile);
 
     EXPECT_NEAR(read_tile->anchor.x(), 4.4, 1e-6);
@@ -233,7 +252,7 @@ TEST(Tile, JSONRoundTrip) {
     ASSERT_EQ(sizeof(uint8_t*), sizeof(std::byte*));
 
     // step 1:
-    TileNode write_tile(default_anchor);
+    Tile1k write_tile(default_anchor);
     write_tile.fill(default_tile_contents);
 
     // // DEBUG
@@ -254,7 +273,7 @@ TEST(Tile, JSONRoundTrip) {
     const std::string& buffer = write_tile.to_json();
 
     // target second half: write to cache
-    const auto read_tile = TileNode::build_from_json(buffer);
+    const auto read_tile = Tile1k::build_from_json(buffer);
     ASSERT_TRUE(read_tile);
 
     EXPECT_NEAR(read_tile->anchor.x(), 4.4, 1e-6);
@@ -273,7 +292,7 @@ TEST(Tile, JSONRoundTrip) {
 }
 
 TEST(Tile, LoadPolygonFromVector) {
-    TileNode tile;
+    Tile1k tile;
     EXPECT_DOUBLE_EQ(tile.anchor.x(), 0.);
     EXPECT_DOUBLE_EQ(tile.anchor.y(), 0.);
 
@@ -306,7 +325,7 @@ TEST(Tile, LoadShapefile) {
     // fyi, this is not a _great_ teste, because a single tile is small,
     // compared to the whole map...
     const Vector2d anchor{771635, 2961225};
-    TileNode tile(anchor);
+    Tile1k tile(anchor);
 
     const string shapefile("data/Somerville/CityLimits.shp");
 
@@ -341,7 +360,7 @@ TEST(Tile, LoadShapefile) {
 
 // TEST(Tile, ToPNG) {
 //     // step 1:
-//     TileNode tile(default_anchor);
+//     Tile1k tile(default_anchor);
 //     tile.fill(default_tile_contents);
 
 //     // DEBUG
