@@ -1,4 +1,6 @@
 // GPL v3 (c) 2020
+// namespace yggdrasil
+// GPL v3 (c) 2020
 
 #include <cmath>
 #include <cstdio>
