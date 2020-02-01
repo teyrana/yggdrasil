@@ -61,9 +61,9 @@ SET(LIB_HEADERS
                 src/geometry/index/z-index.hpp src/geometry/index/z-index.inl
                 src/geometry/interpolate.hpp src/geometry/interpolate.inl
                 src/geometry/polygon.hpp
-                # src/io/json.hpp
                 src/io/readers.hpp src/io/readers.inl
                 src/io/writers.hpp
+                src/node/grid_node.hpp
                 # src/node/quad_node.hpp
                 src/node/tile_node.hpp
                 # src/quadtree/tree.hpp
@@ -74,6 +74,7 @@ SET(LIB_SOURCES
                 src/geometry/bounds.cpp
                 src/geometry/polygon.cpp
                 src/io/writers.cpp
+                src/node/grid_node.cpp
                 # src/node/quad/quad_node.cpp
                 src/node/tile_node.cpp
                 # src/quadtree/tree.cpp
@@ -102,6 +103,7 @@ SET(TEST_SOURCES
                     src/geometry/index/z-index.test.cpp
                     src/geometry/interpolate.test.cpp
                     src/geometry/polygon.test.cpp
+                    src/node/grid_node.test.cpp
                     # src/node/quad_node.cpp
                     src/node/tile_node.test.cpp
                     # src/quadtree/tree.cpp
