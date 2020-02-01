@@ -1,4 +1,5 @@
 // GPL v3 (c) 2020
+
 #ifndef _QUAD_NODE_HPP_
 #define _QUAD_NODE_HPP_
 
