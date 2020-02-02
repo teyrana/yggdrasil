@@ -19,6 +19,8 @@
 // #include "geometry/z_index.hpp"
 #include "geometry/polygon.hpp"
 
+#include "node/node_status.hpp"
+
 using std::cerr;
 using std::endl;
 using std::isnan;
@@ -44,10 +46,6 @@ template <typename cell_t, size_t dimension> class TileNode {
      *  Releases all memory associated with this quad tree.
      */
     ~TileNode(){};
-
-    /// \brief used for loading a flatbuffer data structure
-    static std::unique_ptr<TileNode>
-    build_from_flatbuffer(const std::byte* const buffer);
 
     ///! \brief loads a json document from the given buffer
     ///!
@@ -86,6 +84,8 @@ template <typename cell_t, size_t dimension> class TileNode {
 
     const geometry::Bounds get_bounds() const;
 
+    cell_t get_value() const;
+
     /// \brief used for loading a flatbuffer data structure
     bool load_from_flatbuffer(const std::byte* const buffer);
 
@@ -95,6 +95,8 @@ template <typename cell_t, size_t dimension> class TileNode {
     inline void reset() {}
 
     // void set(const double x, const double y, const T new_value);
+
+    NodeStatus status() const;
 
     bool store(const Eigen::Vector2d& p, const cell_t new_value);
 
@@ -137,6 +139,8 @@ template <typename cell_t, size_t dimension> class TileNode {
     /// \brief defines lookup method for data in this tile
     yggdrasil::geometry::index::RowMajorIndex<dimension, cell_t> index;
 
+    NodeStatus status_;
+
   private:
     friend class Tile_CacheRoundTrip_Test;
     friend class Tile_LoadPolygonFromVector_Test;
@@ -146,6 +150,7 @@ template <typename cell_t, size_t dimension> class TileNode {
 
 // All typedefs declared here have an explicit template specialization
 // in the corresponding source file
+typedef TileNode<uint8_t, 4> TestTile;
 typedef TileNode<uint8_t, 32> Tile1k;
 typedef TileNode<uint8_t, 1024> Tile1M;
 

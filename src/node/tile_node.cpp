@@ -39,25 +39,16 @@ const std::string TileNode<cell_t, dimension>::y_key = "y";
 
 template <typename cell_t, size_t dimension>
 TileNode<cell_t, dimension>::TileNode()
-    : anchor(Vector2d(0., 0.)), index(data) {}
+    : anchor(Vector2d(0., 0.)), index(data), status_(Uniform)
+{
+    fill(0);
+}
 
 template <typename cell_t, size_t dimension>
 TileNode<cell_t, dimension>::TileNode(const Vector2d& _anchor)
-    : anchor(_anchor), index(data) {}
-
-template <typename cell_t, size_t dimension>
-std::unique_ptr<TileNode<cell_t, dimension>>
-TileNode<cell_t, dimension>::build_from_flatbuffer(
-    const std::byte* const cache_buffer) {
-    const auto cache_loader = GetTileCache(cache_buffer);
-    const double x = cache_loader->x();
-    const double y = cache_loader->y();
-
-    auto result = std::make_unique<TileNode<cell_t, dimension>>(Vector2d(x, y));
-
-    result->load_from_flatbuffer(cache_buffer);
-
-    return result;
+    : anchor(_anchor), index(data), status_(Uniform)
+{
+    fill(0);
 }
 
 template <typename cell_t, size_t dimension>
@@ -128,6 +119,8 @@ TileNode<cell_t, dimension>::build_from_json(const std::string& text) {
         }
     }
 
+    result->status_ = NodeStatus::Mixed;
+
     return result;
 }
 
@@ -161,6 +154,7 @@ bool TileNode<cell_t, dimension>::contains(const Vector2d& p) const {
 template <typename cell_t, size_t dimension>
 void TileNode<cell_t, dimension>::fill(const cell_t value) {
     memset(data.data(), value, sizeof(cell_t) * size);
+    status_ = NodeStatus::Uniform;
 }
 
 template <typename cell_t, size_t dimension>
@@ -176,12 +170,15 @@ void TileNode<cell_t, dimension>::fill(const std::vector<cell_t>& source) {
             ++read_index;
         }
     }
+
+    status_ = NodeStatus::Mixed;
 }
 
 template <typename cell_t, size_t dimension>
 void TileNode<cell_t, dimension>::fill(const Polygon& poly,
                                        const cell_t fill_value) {
     yggdrasil::io::fill_from_polygon(*this, poly, fill_value);
+    status_ = NodeStatus::Mixed;
 }
 
 template <typename cell_t, size_t dimension>
@@ -202,31 +199,38 @@ cell_t TileNode<cell_t, dimension>::get_cell(const size_t xi,
 }
 
 template <typename cell_t, size_t dimension>
-bool TileNode<cell_t, dimension>::load_from_flatbuffer(
-    const std::byte* const buffer) {
-    auto tile_cache = GetTileCache(buffer);
+cell_t TileNode<cell_t, dimension>::get_value() const {
+    return data[0];
+}
 
-    const Eigen::Vector2d expected = {tile_cache->x(), tile_cache->y()};
-    if (!expected.isApprox(anchor)) {
-        return false;
-    }
+template <typename cell_t, size_t dimension>
+bool TileNode<cell_t, dimension>::load_from_flatbuffer(const std::byte* const buffer) {
+    auto tile_cache = GetTileCache(buffer);
 
     auto gridv = tile_cache->grid();
     if (gridv->size() != size) {
         return false;
     }
+
     const uint8_t* read_buffer = gridv->Data();
     uint8_t* write_buffer = data.data();
     memcpy(write_buffer, read_buffer, sizeof(cell_t) * size);
+
+    status_ = NodeStatus::Mixed;
 
     return true;
 }
 
 template <typename cell_t, size_t dimension>
-bool TileNode<cell_t, dimension>::load_from_shapefile(
-    const std::string& filepath) {
+bool TileNode<cell_t, dimension>::load_from_shapefile(const std::string& filepath) {
+    status_ = NodeStatus::Mixed;
     return yggdrasil::io::load_from_shape_file<TileNode, cell_t>(*this,
                                                                  filepath);
+}
+
+template <typename cell_t, size_t dimension>
+NodeStatus TileNode<cell_t, dimension>::status() const {
+    return status_;
 }
 
 template <typename cell_t, size_t dimension>
@@ -322,7 +326,7 @@ const std::byte* const TileNode<cell_t, dimension>::to_flatbuffer() {
     auto tile = CreateTileCache(builder, anchor.x(), anchor.y(), grid);
 
     builder.Finish(tile);
-    // cerr << "::on_finish::buffer.size= " << builder.GetSize() << endl;
+    //cerr << "::on_finish::buffer.size= " << builder.GetSize() << endl;
 
     uint8_t* buffer = builder.GetBufferPointer();
     // builder.Clear(); // useful if/when the builder is re-used.
@@ -336,6 +340,10 @@ const std::byte* const TileNode<cell_t, dimension>::to_flatbuffer() {
 
 // Explicitly instantiate some type
 // ===========
+
+// used for testing
+template class TileNode<uint8_t, 4>;
+
 // this should match the Tile1k type:
 template class TileNode<uint8_t, 32>;
 

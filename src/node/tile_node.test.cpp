@@ -23,6 +23,26 @@ using nlohmann::json;
 
 namespace yggdrasil::node {
 
+TEST(Tile, ConstructDefaultTestTile) {
+    EXPECT_EQ(TestTile::size, 16);
+    EXPECT_DOUBLE_EQ(TestTile::scale, 1.);
+    EXPECT_DOUBLE_EQ(TestTile::width, 4.);
+
+    TestTile tile;
+
+    EXPECT_EQ(tile.size, 16);
+    // Not available as a member -- static or instance.
+    // EXPECT_EQ(tile.dimension, 32);
+    EXPECT_DOUBLE_EQ(tile.scale, 1.);
+    EXPECT_DOUBLE_EQ(tile.width, 4.);
+
+    EXPECT_DOUBLE_EQ(tile.anchor.x(), 0.);
+    EXPECT_DOUBLE_EQ(tile.anchor.y(), 0.);
+
+    EXPECT_EQ(tile.status(), NodeStatus::Uniform);
+    EXPECT_EQ(tile.get_value(), 0);
+}
+
 TEST(Tile, ConstructDefault1k) {
     EXPECT_EQ(Tile1k::size, 1024);
     EXPECT_DOUBLE_EQ(Tile1k::scale, 1.);
@@ -38,6 +58,9 @@ TEST(Tile, ConstructDefault1k) {
 
     EXPECT_DOUBLE_EQ(tile.anchor.x(), 0.);
     EXPECT_DOUBLE_EQ(tile.anchor.y(), 0.);
+
+    EXPECT_EQ(tile.status(), NodeStatus::Uniform);
+    EXPECT_EQ(tile.get_value(), 0);
 }
 
 TEST(Tile, ConstructDefault1M) {
@@ -53,6 +76,9 @@ TEST(Tile, ConstructDefault1M) {
 
     EXPECT_DOUBLE_EQ(tile.anchor.x(), 0.);
     EXPECT_DOUBLE_EQ(tile.anchor.y(), 0.);
+
+    EXPECT_EQ(tile.status(), NodeStatus::Uniform);
+    EXPECT_EQ(tile.get_value(), 0);
 }
 
 TEST(Tile, ConstructAtLocation) {
@@ -66,6 +92,9 @@ TEST(Tile, ConstructAtLocation) {
 
     EXPECT_DOUBLE_EQ(tile.anchor.x(), anchor.x());
     EXPECT_DOUBLE_EQ(tile.anchor.y(), anchor.y());
+
+    EXPECT_EQ(tile.status(), NodeStatus::Uniform);
+    EXPECT_EQ(tile.get_value(), 0);
 }
 
 static const Vector2d default_anchor = {4.4, 4.6};
@@ -163,6 +192,9 @@ TEST(Tile, Classify) {
 
     // cerr << tile.to_string() << endl; // DEBUG
 
+    EXPECT_EQ(tile.status(), NodeStatus::Mixed);
+    EXPECT_EQ(tile.get_value(), 'K');
+
     ASSERT_NEAR(tile.anchor.x(), 4.4, 1e-6);
     ASSERT_NEAR(tile.anchor.y(), 4.6, 1e-6);
 
@@ -202,12 +234,14 @@ TEST(Tile, FlatbufferRoundTrip) {
     write_tile.fill(default_tile_contents);
 
     // // DEBUG
-    // cerr << write_tile->to_string() << endl;
+    // cerr << write_tile.to_string() << endl;
 
     { // quickly test the original tile
         EXPECT_NEAR(write_tile.anchor.x(), 4.4, 1e-6);
         EXPECT_NEAR(write_tile.anchor.y(), 4.6, 1e-6);
 
+        EXPECT_EQ(write_tile.status(), NodeStatus::Mixed);
+    
         ASSERT_EQ(write_tile.classify({0., 0.}), 42);
         ASSERT_EQ(write_tile.classify({10., 10.}), 99);
         ASSERT_EQ(write_tile.classify({20., 20.}), 0);
@@ -216,34 +250,36 @@ TEST(Tile, FlatbufferRoundTrip) {
     }
 
     // target first half: write to cache
-    auto buf = write_tile.to_flatbuffer();
-    EXPECT_NE(nullptr, buf);
+    auto* buffer = write_tile.to_flatbuffer();
+    ASSERT_NE(nullptr, buffer);
 
     // Perform intermediate tests on the buffer
-    auto tile_cache = GetTileCache(buf);
-    EXPECT_NEAR(tile_cache->x(), 4.4, 1e-6);
-    EXPECT_NEAR(tile_cache->y(), 4.6, 1e-6);
+    auto tile_cache = GetTileCache(buffer);
+    ASSERT_NEAR(tile_cache->x(), 4.4, 1e-6);
+    ASSERT_NEAR(tile_cache->y(), 4.6, 1e-6);
+    
+    Tile1k read_tile({tile_cache->x(), tile_cache->y()});
+    ASSERT_NEAR(read_tile.anchor.x(), 4.4, 1e-6);
+    ASSERT_NEAR(read_tile.anchor.y(), 4.6, 1e-6);
 
     // // Not implemented.  Not sure how the builder knows how many total bytes
     // are available, in this case. EXPECT_EQ( tile_cache->GetSize(), 1072);  //
     // serialized size, including packing
 
     // target second half: write to cache
-    const auto read_tile = Tile1k::build_from_flatbuffer(buf);
-    ASSERT_TRUE(read_tile);
-
-    EXPECT_NEAR(read_tile->anchor.x(), 4.4, 1e-6);
-    EXPECT_NEAR(read_tile->anchor.y(), 4.6, 1e-6);
+    ASSERT_TRUE( read_tile.load_from_flatbuffer(buffer) );
 
     // // DEBUG
-    // cerr << read_tile->to_string() << endl;
+    // cerr << read_tile.to_string() << endl;
 
     { // quickly test the loaded tile
-        EXPECT_EQ(read_tile->classify({0., 0.}), 42);
-        EXPECT_EQ(read_tile->classify({10., 10.}), 99);
-        EXPECT_EQ(read_tile->classify({20., 20.}), 0);
-        EXPECT_EQ(read_tile->classify({30., 30.}), 99);
-        EXPECT_EQ(read_tile->classify({40., 40.}), 42);
+        EXPECT_EQ(read_tile.status(), NodeStatus::Mixed);
+
+        EXPECT_EQ(read_tile.classify({0., 0.}), 42);
+        EXPECT_EQ(read_tile.classify({10., 10.}), 99);
+        EXPECT_EQ(read_tile.classify({20., 20.}), 0);
+        EXPECT_EQ(read_tile.classify({30., 30.}), 99);
+        EXPECT_EQ(read_tile.classify({40., 40.}), 42);
     }
 }
 
@@ -261,6 +297,8 @@ TEST(Tile, JSONRoundTrip) {
     { // quickly test the original tile
         EXPECT_NEAR(write_tile.anchor.x(), 4.4, 1e-6);
         EXPECT_NEAR(write_tile.anchor.y(), 4.6, 1e-6);
+
+        EXPECT_EQ(write_tile.status(), NodeStatus::Mixed);
 
         ASSERT_EQ(write_tile.classify({0., 0.}), 42);
         ASSERT_EQ(write_tile.classify({10., 10.}), 99);
@@ -283,6 +321,8 @@ TEST(Tile, JSONRoundTrip) {
     // cerr << read_tile->to_string() << endl;
 
     { // quickly test the loaded tile
+        EXPECT_EQ(read_tile->status(), NodeStatus::Mixed);
+
         EXPECT_EQ(read_tile->classify({0., 0.}), 42);
         EXPECT_EQ(read_tile->classify({10., 10.}), 99);
         EXPECT_EQ(read_tile->classify({20., 20.}), 0);
@@ -304,6 +344,8 @@ TEST(Tile, LoadPolygonFromVector) {
 
     // // DEBUG
     // cerr << tile.to_string() << endl;
+
+    EXPECT_EQ(tile.status(), NodeStatus::Mixed);
 
     EXPECT_EQ(tile.get_cell(0, 0), 88);
     EXPECT_EQ(tile.get_cell(1, 1), 88);
@@ -337,6 +379,8 @@ TEST(Tile, LoadShapefile) {
     // cerr << tile.to_string() << endl;
 
     { // quickly test the loaded tile
+        EXPECT_EQ(tile.status(), NodeStatus::Mixed);
+
         EXPECT_EQ(tile.get_cell(0, 0), 153);
         EXPECT_EQ(tile.get_cell(1, 1), 153);
         EXPECT_EQ(tile.get_cell(2, 2), 153);
