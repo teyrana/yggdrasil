@@ -120,14 +120,16 @@ SET(LIBRARY_LINKAGE ${LIBRARY_LINKAGE} ${CHART_GRID_LIB_NAME})
 # ============= Chart Index Library =================
 # Because this is a header only, don't bother to generate a compiled lib***.a
 SET(CHART_INDEX_LIB_NAME chartindex)
-SET(LIB_HEADERS src/index/row-index.hpp )
-# SET(LIB_SOURCES  )
-# add_library(${CHART_INDEX_LIB_NAME} STATIC ${LIB_HEADERS} ${LIB_SOURCES})
+SET(LIB_HEADERS src/index/index2u.hpp
+                src/index/row-index.hpp
+                )
+SET(LIB_SOURCES src/index/index2u.cpp )
 
-# TARGET_INCLUDE_DIRECTORIES(${CHART_INDEX_LIB_NAME} PRIVATE ${CONAN_INCLUDE_DIRS})
-# TARGET_INCLUDE_DIRECTORIES(${CHART_INDEX_LIB_NAME} PRIVATE src)
-# TARGET_LINK_LIBRARIES(${CHART_INDEX_LIB_NAME} PRIVATE ${LIBRARY_LINKAGE})
-# SET(LIBRARY_LINKAGE ${LIBRARY_LINKAGE} ${CHART_INDEX_LIB_NAME})
+add_library(${CHART_INDEX_LIB_NAME} STATIC ${LIB_HEADERS} ${LIB_SOURCES})
+
+TARGET_LINK_LIBRARIES(${CHART_INDEX_LIB_NAME} PRIVATE ${LIBRARY_LINKAGE})
+
+SET(LIBRARY_LINKAGE ${LIBRARY_LINKAGE} ${CHART_INDEX_LIB_NAME})
 
 # ============= Build Project Tests  =================
 # https://cmake.org/cmake/help/v3.0/module/FindGTest.html 

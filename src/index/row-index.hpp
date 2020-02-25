@@ -19,8 +19,8 @@ public:
         return i + (j * dimension);
     }
 
-    constexpr static size_t lookup( const Index2u& i ){
-        return i[0] + (i[1] * dimension);
+    constexpr static size_t lookup( const Index2u& at ){
+        return at.j + (at.j * dimension);
     }
 };
 

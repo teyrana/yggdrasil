@@ -3,13 +3,26 @@
 #ifndef _INDEX_TYPEDEF_HPP_
 #define _INDEX_TYPEDEF_HPP_
 
-#include <Eigen/Core>
+#include <cstdint>
 
 namespace chart::index {
 
-typedef Eigen::Matrix<uint32_t, 2, 1> Vector2u;
+class Index2u {
+public:
+    Index2u();
+    Index2u( uint32_t _i, uint32_t _j);
+    Index2u( const Index2u& origin ); // copy constructor
+    Index2u operator+( const Index2u& other ) const;
+    Index2u operator-( const Index2u& other ) const;
+    double norm1( const Index2u& other ) const;
+    double norm2( const Index2u& other ) const;
 
-typedef Eigen::Matrix<uint32_t, 2, 1> Index2u;
+
+public:
+    const uint32_t i;
+    const uint32_t j;
+
+};
 
 }; // namespace chart::index
 

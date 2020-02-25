@@ -72,7 +72,7 @@ cell_t FixedGrid<cell_t,dim>::classify(const Vector2d& p, const cell_t default_v
 template<typename cell_t, size_t dim>
 Index2u FixedGrid<cell_t,dim>::discretize(const Eigen::Vector2d& pa) const {
     auto pr = bounds_.translate(pa);
-    return {static_cast<size_t>(pr.x() / precision_), static_cast<size_t>(pr.y() / precision_)};
+    return Index2u(static_cast<uint32_t>(pr.x() / precision_), static_cast<uint32_t>(pr.y() / precision_));
 }
 
 template<typename cell_t, size_t dim>
