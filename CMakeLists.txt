@@ -110,7 +110,6 @@ SET(LIBRARY_LINKAGE ${LIBRARY_LINKAGE} ${CHART_GEOMETRY_LIB_NAME})
 SET(CHART_GRID_LIB_NAME chartgrid)
 SET(LIB_HEADERS src/grid/fixed-grid.hpp )
 SET(LIB_SOURCES src/grid/fixed-grid.cpp )
-
 add_library(${CHART_GRID_LIB_NAME} STATIC ${LIB_HEADERS} ${LIB_SOURCES})
 
 TARGET_LINK_LIBRARIES(${CHART_GRID_LIB_NAME} PRIVATE ${LIBRARY_LINKAGE})
@@ -131,6 +130,33 @@ TARGET_LINK_LIBRARIES(${CHART_INDEX_LIB_NAME} PRIVATE ${LIBRARY_LINKAGE})
 
 SET(LIBRARY_LINKAGE ${LIBRARY_LINKAGE} ${CHART_INDEX_LIB_NAME})
 
+# ============= Chart Search Library =================
+SET(CHART_SEARCH_LIB_NAME chartsearch)
+SET(LIB_HEADERS src/search/a-star.hpp
+                src/search/a-star.inl
+                src/search/cost.hpp
+                src/search/reachable-cell.hpp )
+
+SET(LIB_SOURCES src/search/cost.cpp
+                src/search/reachable-cell.cpp )
+
+add_library(${CHART_SEARCH_LIB_NAME} STATIC ${LIB_HEADERS} ${LIB_SOURCES})
+
+TARGET_LINK_LIBRARIES(${CHART_SEARCH_LIB_NAME} PRIVATE ${LIBRARY_LINKAGE})
+
+SET(LIBRARY_LINKAGE ${LIBRARY_LINKAGE} ${CHART_SEARCH_LIB_NAME})
+
+# ============= Chart Search Library =================
+SET(CHART_SEARCH_LIB_NAME chartsearch)
+SET(LIB_HEADERS src/search/a-star.hpp
+                src/search/a-star.inl )
+
+# add_library(${CHART_SEARCH_LIB_NAME} STATIC ${LIB_HEADERS} ${LIB_SOURCES})
+
+# TARGET_LINK_LIBRARIES(${CHART_SEARCH_LIB_NAME} PRIVATE ${LIBRARY_LINKAGE})
+
+# SET(LIBRARY_LINKAGE ${LIBRARY_LINKAGE} ${CHART_SEARCH_LIB_NAME})
+
 # ============= Build Project Tests  =================
 # https://cmake.org/cmake/help/v3.0/module/FindGTest.html 
 SET(TEST_EXE testall)
@@ -141,7 +167,7 @@ SET(TEST_SOURCES    src/geometry/bounds.test.cpp
                     src/index/row-index.test.cpp
                     src/index/z-index.test.cpp
                     src/grid/fixed-grid.test.cpp
-                    # src/search/a-star.test.cpp
+                    src/search/a-star.test.cpp
                     )
 
 SET(TEST_LINKAGE ${CHART_GRID_LIB_NAME} ${LIBRARY_LINKAGE} ${CONAN_LIBS} gtest gtest_main )

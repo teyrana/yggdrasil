@@ -50,7 +50,7 @@ gridtest: debug
 quadtest: debug
 	$(TEST_EXE) --gtest_filter=QuadTree*
 
-search: debug
+searchtest: debug
 	$(TEST_EXE) --gtest_filter=Search*
 
 testall: build
