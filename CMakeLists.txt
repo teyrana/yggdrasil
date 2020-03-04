@@ -99,8 +99,12 @@ SET(LIBRARY_LINKAGE ${LIBRARY_LINKAGE} ${CHART_GEOMETRY_LIB_NAME})
 
 # ============= Chart Grid Library =================
 SET(CHART_GRID_LIB_NAME chartgrid)
-SET(LIB_HEADERS src/grid/fixed-grid.hpp )
-SET(LIB_SOURCES src/grid/fixed-grid.cpp )
+SET(LIB_HEADERS src/grid/fixed-grid.hpp 
+                src/grid/rolling-grid.hpp
+    )
+SET(LIB_SOURCES src/grid/fixed-grid.cpp
+                src/grid/rolling-grid.cpp
+    )
 add_library(${CHART_GRID_LIB_NAME} STATIC ${LIB_HEADERS} ${LIB_SOURCES})
 
 TARGET_LINK_LIBRARIES(${CHART_GRID_LIB_NAME} PRIVATE ${LIBRARY_LINKAGE})
@@ -146,6 +150,7 @@ SET(TEST_SOURCES    src/geometry/bounds.test.cpp
                     src/geometry/polygon.test.cpp
                     src/index/row-index.test.cpp
                     src/index/z-index.test.cpp
+                    src/grid/rolling-grid.test.cpp
                     src/grid/fixed-grid.test.cpp
                     src/search/a-star.test.cpp
                     # src/search/rrt-star.test.cpp

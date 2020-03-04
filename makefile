@@ -43,17 +43,20 @@ help:
 	@ echo "....nyi"
 
 .PHONY: test testgrid
-test: testall
-gridtest: debug
+test: test-all
+test-fix-grid: debug
 	$(TEST_EXE) --gtest_filter=FixedGrid*
 
-quadtest: debug
+test-roll-grid: debug
+	$(TEST_EXE) --gtest_filter=RollingGrid*
+
+test-quad-tree: debug
 	$(TEST_EXE) --gtest_filter=QuadTree*
 
-searchtest: debug
+test-search: debug
 	$(TEST_EXE) --gtest_filter=Search*
 
-testall: build
+test-all: build
 	clear
 	$(TEST_EXE)
 

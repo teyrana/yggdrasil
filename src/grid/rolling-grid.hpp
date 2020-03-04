@@ -22,7 +22,7 @@
 namespace chart::grid {
 
 template<typename cell_t, size_t dim>
-class FixedGrid : public ::chart::base::ChartInterface< cell_t, FixedGrid<cell_t,dim> > {
+class RollingGrid : public ::chart::base::ChartInterface< cell_t, RollingGrid<cell_t,dim> > {
 public:
 
     /**
@@ -30,19 +30,19 @@ public:
      * 
      * Use this constructor if the tree will be loaded from a config file, and the initialization values do not matter.
      */
-    FixedGrid();
+    RollingGrid();
     
     /**
      * Constructs a new 2d square grid
      */
-    FixedGrid(const geometry::Bounds& _bounds);
+    RollingGrid(const geometry::Bounds& _bounds);
 
-    FixedGrid(double precision, const geometry::Bounds& _bounds);
+    RollingGrid(double precision, const geometry::Bounds& _bounds);
 
     /**
      *  Releases all memory associated with this quad tree.
      */
-    ~FixedGrid(){};
+    ~RollingGrid(){};
 
     bool blocked(const index::Index2u& at) const;
 
@@ -52,6 +52,7 @@ public:
      * @return Bounds object describing the tree's overall bounds.
      */
     const Bounds& bounds() const;
+
 
     /// \brief Retrieve the value at an (x, y) Eigen::Vector2d
     ///
@@ -99,6 +100,8 @@ public:
     cell_t& get_cell(const size_t xi, const size_t yi);
     cell_t get_cell(const size_t xi, const size_t yi) const ;
 
+    bool move(const Eigen::Vector2d& p);
+
     cell_t& operator[](const index::Index2u& i);
     cell_t operator[](const index::Index2u& i) const ;
 
@@ -124,6 +127,7 @@ public:
     /// \brief the _total_ number of cells in this grid === (width * height)
     size_t width() const;
 
+
 public:
     /// \brief the data layout this grid represents
     Bounds bounds_;
@@ -140,10 +144,14 @@ public:
 
     constexpr static cell_t blocking_threshold = 'A'; // == debugging value
 
+// private:
+//     friend class RollingGrid_CalculateBorder_Test;
+
 };
 
-typedef FixedGrid<uint8_t, 8> FixedGrid64;
-typedef FixedGrid<uint8_t, 32> FixedGrid1k;
+typedef RollingGrid<uint8_t, 8> RollingGrid64;
+typedef RollingGrid<uint8_t, 32> RollingGrid1k;
+typedef RollingGrid<uint8_t, 64> RollingGrid4k;
 
 }; // namespace chart::grid
 
