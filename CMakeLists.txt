@@ -68,19 +68,10 @@ INCLUDE_DIRECTORIES(src)
 SET(CHART_BASE_LIB_NAME chartbase)
 SET(LIB_HEADERS src/base/chart-interface.hpp
                 src/base/chart-loaders.inl
-                # src/base/readers.hpp src/base/readers.inl
-                # src/base/writers.hpp
-                # src/node/grid_node.hpp
-                # src/node/quad_node.hpp
-                # src/node/tile_node.hpp
-                # src/quadtree/tree.hpp
-                # include/world_tree.hpp
-                )
+                # src/base/readers.inl
+                # src/base/writers.inl
+    )
 # SET(LIB_SOURCES src/base/writers.cpp
-                # src/node/grid-node.cpp
-                # src/node/quad/quad_node.cpp
-                # src/node/tile_node.cpp
-                # src/quadtree/tree.cpp
                 # )
 
 # # Generate the static library from the sources
@@ -134,7 +125,10 @@ SET(LIBRARY_LINKAGE ${LIBRARY_LINKAGE} ${CHART_INDEX_LIB_NAME})
 SET(CHART_SEARCH_LIB_NAME chartsearch)
 SET(LIB_HEADERS src/search/a-star.hpp
                 src/search/a-star.inl
-                src/search/cost.hpp )
+                src/search/cost.hpp
+                # src/search/rrt-star.hpp
+                # src/search/rrt-star.inl
+    )
 SET(LIB_SOURCES src/search/cost.cpp )
 
 add_library(${CHART_SEARCH_LIB_NAME} STATIC ${LIB_HEADERS} ${LIB_SOURCES})
@@ -154,7 +148,8 @@ SET(TEST_SOURCES    src/geometry/bounds.test.cpp
                     src/index/z-index.test.cpp
                     src/grid/fixed-grid.test.cpp
                     src/search/a-star.test.cpp
-                    )
+                    # src/search/rrt-star.test.cpp
+    )
 
 SET(TEST_LINKAGE ${CHART_GRID_LIB_NAME} ${LIBRARY_LINKAGE} ${CONAN_LIBS} gtest gtest_main )
 
