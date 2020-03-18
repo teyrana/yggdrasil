@@ -4,6 +4,9 @@ PROJECT( libchartbox )
 include(${CMAKE_ROOT}/Modules/ExternalProject.cmake) 
 MESSAGE(STATUS "bindir: " ${CMAKE_BINARY_DIR})
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/debug)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/release)
+
 #=============================================================================
 # Set the output directories for the binary and library files
 #=============================================================================

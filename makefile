@@ -1,5 +1,7 @@
 
 ROOT_DIR:=$(PWD)
+SRC_ROOT:=$(ROOT_DIR)/src
+
 BUILD_TYPE:="Release"
 BUILD_DIR=$(ROOT_DIR)/build
 CONAN_MARKER=$(BUILD_DIR)/conanbuildinfo.cmake
@@ -36,6 +38,9 @@ cmake-release: $(CONAN_MARKER)
 
 clean: 
 	rm -rf build/*
+
+format:
+	@echo clang-format ?????
 
 .PHONY: help
 help: 
