@@ -1,7 +1,7 @@
 // GPL v3 (c) 2020, Daniel Williams 
 
-#ifndef _BOUNDING_BOX_HPP_
-#define _BOUNDING_BOX_HPP_
+#ifndef _BOUNDS_HPP_
+#define _BOUNDS_HPP_
 
 #include <Eigen/Geometry>
 using Eigen::Vector2d;
@@ -73,5 +73,6 @@ protected:
 
 }; // class Bounds
 
-};     // namespace chart::geometry
-#endif // #ifndef _BOUNDING_BOX_HPP_
+}    // namespace chart::geometry
+
+#endif // #ifndef _BOUNDS_HPP_

@@ -11,8 +11,6 @@ namespace chart::search {
 
 float euclideanCost(const index::Index2u& at, const index::Index2u& goal);
 
-}; // namespace chart::search
-
-
+} // namespace chart::search
 
 #endif // #ifndef _SEARCH_COST_HPP_

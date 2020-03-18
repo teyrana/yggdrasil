@@ -41,4 +41,4 @@ double Index2u::norm2( const Index2u& other ) const {
 }
 
 
-}; // namespace chart::index
+} // namespace chart::index

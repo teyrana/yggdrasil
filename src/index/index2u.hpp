@@ -24,6 +24,6 @@ public:
 
 };
 
-}; // namespace chart::index
+} // namespace chart::index
 
 #endif // #ifndef _INDEX_TYPEDEF_HPP_

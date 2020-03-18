@@ -145,6 +145,6 @@ public:
 typedef FixedGrid<uint8_t, 8> FixedGrid64;
 typedef FixedGrid<uint8_t, 32> FixedGrid1k;
 
-}; // namespace chart::grid
+} // namespace chart::grid
 
 #endif // _GRID_HPP_

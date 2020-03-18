@@ -35,6 +35,6 @@ std::vector<T> vflip(const std::vector<T>& source, const size_t row_width) {
     return sink;
 }
 
-}; // namespace chart::geometry
+} // namespace chart::geometry
 
 #endif // #ifdef _CHART_WRITERS_HPP_

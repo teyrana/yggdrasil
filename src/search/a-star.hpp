@@ -107,7 +107,7 @@ private:
 
 };
 
-}; // namespace chart::search
+} // namespace chart::search
 
 #include "search/a-star.inl"
 

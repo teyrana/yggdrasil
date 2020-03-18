@@ -13,4 +13,4 @@ float euclideanCost(const Index2u& at, const Index2u& goal){
     return at.norm2(goal);
 }
 
-};  // namespace chart::search
+}  // namespace chart::search

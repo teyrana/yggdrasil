@@ -159,7 +159,7 @@ SET(TEST_SOURCES    src/geometry/bounds.test.cpp
                     # src/search/rrt-star.test.cpp
     )
 
-SET(TEST_LINKAGE ${CHART_GRID_LIB_NAME} ${LIBRARY_LINKAGE} ${CONAN_LIBS} gtest gtest_main )
+SET(TEST_LINKAGE ${CHART_GRID_LIB_NAME} ${LIBRARY_LINKAGE} ${CONAN_LIBS} gtest gtest_main pthread)
 
 MESSAGE( STATUS "Generating all tests ...")
 MESSAGE( STATUS "    with name: ${TEST_EXE}")

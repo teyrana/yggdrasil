@@ -153,6 +153,6 @@ typedef RollingGrid<uint8_t, 8> RollingGrid64;
 typedef RollingGrid<uint8_t, 32> RollingGrid1k;
 typedef RollingGrid<uint8_t, 64> RollingGrid4k;
 
-}; // namespace chart::grid
+} // namespace chart::grid
 
 #endif // _GRID_HPP_

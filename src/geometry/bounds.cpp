@@ -1,8 +1,10 @@
 // GPL v3 (c) 2020, Daniel Williams 
 
 #include <cfloat>
+#include <cmath>
 #include <iostream>
 #include <string>
+using std::isnan;
 
 #include <Eigen/Geometry>
 using Eigen::Vector2d;

@@ -114,7 +114,8 @@ public:
     constexpr static cell_t block_value = 255;
 
 }; // class ChartInterface<T>
-}; // namespace chart::base
+
+} // namespace chart::base
 
 #include "chart-interface.inl"
 

@@ -56,7 +56,7 @@ private:
 
 };
 
-}; // namespace chart::search
+} // namespace chart::search
 
 #include "search/rrt-star.inl"
 
