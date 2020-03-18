@@ -51,6 +51,7 @@ This project makes use of several libraries
 
 ## Handled by Conan [13]:
 - Eigen [7] (@3.3.7) - math / linear algebra library
+- fmt [15] (@6.1.2) - output formatting library
 - nlohmann/json [4] (@3.7.3) - json I/O libray
 
 ## Not Included, Not integrated, but want to:
@@ -72,3 +73,4 @@ References
 - [12] [Flatbuffers](https://google.github.io/flatbuffers/)
 - [13] [Conan](https://docs.conan.io/en/latest/introduction.html)
 - [14] [Pitchfork Layout](https://github.com/vector-of-bool/pitchfork/)
+- [15] [\{fmt\}](https://github.com/fmtlib/fmt)

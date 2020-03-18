@@ -3,7 +3,7 @@
 
 [requires]
 eigen/3.3.7@conan/stable
-# fmt/6.1.2
+fmt/6.1.2
 nlohmann_json/3.7.3
 
 [options]
