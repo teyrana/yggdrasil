@@ -133,4 +133,4 @@ TEST(Bounds, LoadJSONCenterWidth) {
     ASSERT_DOUBLE_EQ(rectangle.northeast().y(), 55);
 }
 
-};
+}

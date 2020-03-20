@@ -197,4 +197,4 @@ size_t FixedGrid<cell_t,dim>::width() const {
 template class FixedGrid<uint8_t, 8>;
 template class FixedGrid<uint8_t, 32>;
 
-};  // namespace chart::grid
+}  // namespace chart::grid

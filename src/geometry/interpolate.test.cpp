@@ -108,4 +108,4 @@ TEST(InterpolateTest, InterpolateQuad) {
     }
 }
 
-};
+}

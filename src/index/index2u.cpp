@@ -1,15 +1,11 @@
 // GPL v3 (c) 2020, Daniel Williams 
 
-#include <cstdlib>
 #include <cmath> 
+#include <cstdlib>
 
 #include "index/index2u.hpp"
 
-namespace chart::index {
-
-Index2u::Index2u()
-    : i(0), j(0)
-{}
+using chart::index::Index2u;
 
 Index2u::Index2u( uint32_t _i, uint32_t _j)
     : i(_i), j(_j)
@@ -39,6 +35,3 @@ double Index2u::norm2( const Index2u& other ) const {
     return std::sqrt( std::pow( static_cast<double>(i) - static_cast<double>(other.i), 2.)
                     + std::pow( static_cast<double>(j) - static_cast<double>(other.j), 2.) );
 }
-
-
-} // namespace chart::index

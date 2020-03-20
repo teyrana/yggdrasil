@@ -110,4 +110,4 @@ TEST(Polygon, MakeBounds) {
     EXPECT_DOUBLE_EQ(bounds.size().y(), 7.);
 }
 
-}; // namespace chart::geometry
+}

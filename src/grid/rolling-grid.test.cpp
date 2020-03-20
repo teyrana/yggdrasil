@@ -672,4 +672,4 @@ TEST( RollingGrid, FillHoledPolygon) {
 //     terrain::io::to_png(terrain, filename);
 // }
 
-}; // namespace chart::grid
+}

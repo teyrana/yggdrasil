@@ -22,7 +22,7 @@ release: cmake-release
 	cd $(BUILD_DIR) && ninja
 
 .PHONY: conan
-conan: $(CONAN_MARKER)S
+conan: $(CONAN_MARKER)
 
 $(CONAN_MARKER): 
 	@ echo "did not find conan-build-info file... rebuilding: "
@@ -40,7 +40,7 @@ clean:
 	rm -rf build/*
 
 format:
-	@echo clang-format ?????
+	@echo clang-tidy src
 
 .PHONY: help
 help: 

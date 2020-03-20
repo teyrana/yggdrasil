@@ -65,7 +65,7 @@ bool ChartInterface<cell_t, chart_t>::fill(const geometry::Path& path, const cel
         // draw minor-tick points in between waypoints
         const Vector2d segment_start = path[segment_index];
         Vector2d fill_location = segment_start + tick_increment;
-        for( auto tick_index = 1; tick_index <= tick_count; ++tick_index ){
+        for( size_t tick_index = 1; tick_index <= tick_count; ++tick_index ){
             THIS->store( fill_location, fill_value);
             fill_location += tick_increment; //Vector2d(x_incr, y_incr);
         }
@@ -95,7 +95,7 @@ bool ChartInterface<cell_t, chart_t>::fill(const geometry::Polygon& poly, const 
     for( double y = bounds.min().y() + prec/2; y < bounds.max().y(); y += prec ){
         // generate a list of line-segment crossings from the polygon
         std::vector<double> crossings;
-        for (int i=0; i < poly.size()-1; ++i) {
+        for (size_t i=0; i < poly.size()-1; ++i) {
             const Vector2d& p1 = poly[i];
             const Vector2d& p2 = poly[i+1];
 
@@ -118,7 +118,7 @@ bool ChartInterface<cell_t, chart_t>::fill(const geometry::Polygon& poly, const 
         std::sort(crossings.begin(), crossings.end());
         
         //  Fill the pixels between node pairs.
-        for( int crossing_index = 0; crossing_index < crossings.size(); crossing_index += 2){
+        for( size_t crossing_index = 0; crossing_index < crossings.size(); crossing_index += 2){
             const double start_x = bounds.constrain_x(crossings[crossing_index] + prec/2);
             const double end_x = bounds.constrain_x(crossings[crossing_index+1] + prec/2);
             for( double x = start_x; x < end_x; x += prec){

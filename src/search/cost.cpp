@@ -7,10 +7,6 @@
 using chart::index::Index2u;
 
 // ====== ====== ====== Cost Functions (free)  ====== ====== ======
-namespace chart::search {
-
-float euclideanCost(const Index2u& at, const Index2u& goal){
+float chart::search::euclideanCost(const Index2u& at, const Index2u& goal){
     return at.norm2(goal);
 }
-
-}  // namespace chart::search

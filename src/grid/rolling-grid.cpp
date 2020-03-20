@@ -203,4 +203,4 @@ template class RollingGrid<uint8_t, 8>;
 template class RollingGrid<uint8_t, 32>;
 template class RollingGrid<uint8_t, 64>;
 
-};  // namespace chart::grid
+}  // namespace chart::grid

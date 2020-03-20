@@ -14,9 +14,6 @@
 #include "grid/fixed-grid.hpp"
 #include "search/a-star.hpp"
 
-using std::cerr;
-using std::endl;
-using std::isnan;
 using std::string;
 
 using Eigen::Vector2d;
