@@ -1,5 +1,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
-PROJECT( libchartbox )
+PROJECT( chartbox )
+
+set(CMAKE_C_COMPILER /usr/bin/clang)
+set(CMAKE_CPP_COMPILER /usr/bin/clang)
 
 include(${CMAKE_ROOT}/Modules/ExternalProject.cmake) 
 MESSAGE(STATUS "bindir: " ${CMAKE_BINARY_DIR})
@@ -24,21 +27,23 @@ SET(LIBRARY_LINKAGE ${LIBRARY_LINKAGE} ${CONAN_LIBS})
 
 # ============= GDal =================
 # Used for most file I/O
-SET(GDAL_PATH "/usr/local/Cellar/gdal/2.4.2/lib/")
-# SET(GDAL_LINKAGE "/usr/local/Cellar/gdal/2.4.2/lib/libgdal.dylib")
+
 SET(GDAL_LINKAGE gdal)
 SET(LIBRARY_LINKAGE ${LIBRARY_LINKAGE} ${GDAL_LINKAGE})
 
 # ADD_DEFINITIONS(-DENABLE_GDAL)
 
-MESSAGE( STATUS "Configured GDal... ")
+MESSAGE( STATUS ">>> Configured GDal... ")
 MESSAGE( STATUS "    with path: ${GDAL_PATH}")
+
+MESSAGE( STATUS ">>> Configured PDal with path: ${PDAL_PATH}")
+
 
 # Set Compile Flags
 #=============================================================================
 # specify as CMAKE_CXX_FLAGS, instead of 'TARGET_COMPILE_OPTIONS(...' because we have multiple compilation targets.
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17  -fno-exceptions -fno-rtti")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic ")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic ")
 
 # set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=*")
 # # Clang-Tidy doesn't check headers by default.  Enable that:
@@ -47,7 +52,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic ")
 set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} -Og -DDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -DNDEBUG")
 
-MESSAGE( STATUS ">> Configuring Build Type: ${CMAKE_BUILD_TYPE}")
+MESSAGE( STATUS ">>> Configuring Build Type: ${CMAKE_BUILD_TYPE}")
 IF(CMAKE_BUILD_TYPE STREQUAL "Debug")
     MESSAGE( STATUS ".... Configuring Debug Mode.")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -g")

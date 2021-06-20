@@ -14,11 +14,13 @@ TEST_EXE=build/bin/testall
 build: debug 
 
 .PHONY: debug
-debug: cmake-debug
+debug: BUILD_TYPE="Debug"
+debug: help configure #build
 	cd $(BUILD_DIR) && ninja
 
 .PHONY: release
-release: cmake-release
+release: BUILD_TYPE="Debug"
+release: configure build
 	cd $(BUILD_DIR) && ninja
 
 .PHONY: conan
@@ -26,15 +28,11 @@ conan: $(CONAN_MARKER)
 
 $(CONAN_MARKER): 
 	@ echo "did not find conan-build-info file... rebuilding: "
-	cd $(BUILD_DIR) && conan install --build=missing ..
+	cd $(BUILD_DIR) && conan install --build=missing --profile=gcc-profile ..
 
-cmake-debug: $(CONAN_MARKER)
+configure: $(CONAN_MARKER)
 	cd $(BUILD_DIR) && \
-		cmake .. -DCMAKE_BUILD_TYPE=Debug -GNinja
-
-cmake-release: $(CONAN_MARKER)
-	cd $(BUILD_DIR) && \
-		cmake .. -DCMAKE_BUILD_TYPE=Release -GNinja
+		cmake .. -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) -GNinja
 
 clean: 
 	rm -rf build/*
