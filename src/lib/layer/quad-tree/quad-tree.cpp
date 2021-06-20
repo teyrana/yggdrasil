@@ -17,17 +17,15 @@ using Eigen::Vector2d;
 #include <nlohmann/json.hpp>
 using nlohmann::json;
 
-#include "geometry/layout.hpp"
 #include "geometry/polygon.hpp"
-// #include "quadtree/tree.hpp"
-#include "world_tree.hpp"
+#include "quadtree/quad-tree.hpp"
 
 using yggdrasil::geometry::Layout;
 using yggdrasil::quadtree::WorldTree;
 using yggdrasilgeometry::Polygon;
 // using yggdrasil::quadtree::Node;
 
-namespace yggdrasil {};
+
 
 // main method for descending through a tree and returning the appropriate
 // location / node / value note: weakly optimized; intended to be a hot path.

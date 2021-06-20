@@ -1,7 +1,6 @@
 // GPL v3 (c) 2020, Daniel Williams 
 
-#ifndef _CHART_READERS_HPP_
-#define _CHART_READERS_HPP_
+#pragma once
 
 #include <cstdio>
 #include <string>
@@ -42,13 +41,11 @@ bool load_from_json(target_t& chart, nlohmann::json grid);
 template <typename target_t, typename cell_t>
 bool load_grid_from_json(target_t& chart, nlohmann::json grid);
 
-///! \brief loads all the allowed and blocked areas
-///! @param allow - a (json) list of allowed areas, as defined by polygons, as
-/// defined by a list of points. ! @param block - a (json) list of blocked
-/// areas, as defined by polygons, as defined by a list of points.
+/// \brief loads all the allowed and blocked areas
+/// \param allow - a (json) list of allowed areas, as defined by polygons, as defined by a list of points. 
+/// \param block - a (json) list of blocked areas, as defined by polygons, as defined by a list of points.
 template <typename target_t, typename cell_t>
-bool load_areas_from_json(target_t& chart, nlohmann::json allow,
-                          nlohmann::json block);
+bool load_areas_from_json(target_t& chart, nlohmann::json allow, nlohmann::json block);
 
 ///! \brief loads list of polygons from json, into a structure
 ///!
@@ -71,4 +68,3 @@ bool load_from_shape_file(target_t& chart, const std::string& filepath);
 
 #include "readers.inl"
 
-#endif // #ifdef _CHART_READERS_HPP_

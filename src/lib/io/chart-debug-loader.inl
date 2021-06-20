@@ -9,21 +9,126 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <unistd.h>
 #include <vector>
 
-using std::cerr;
-using std::endl;
-using std::string;
 
+// third-party includes
 #include <Eigen/Geometry>
-
 #include <nlohmann/json.hpp>
 
-#include "geometry/polygon.hpp"
+
+#ifdef ENABLE_GDAL
+#include <gdal/gdal.h>
+#include <gdal/gdal_priv.h>
+#endif
+
+#ifdef ENABLE_PDAL
+#include <pdal/pdal.h>
+#endif
+
 
 using Eigen::Vector2d;
 
 using chart::geometry::Polygon;
+
+template<typename layer_t>
+ChartLoader<layer_t>::ChartLoader( layer_t& _dest )
+    : destination_(_dest)
+{}
+
+
+
+template<typename layer_t>
+bool ChartLoader<layer_t>::load_file( std::string& filename ){
+    if( access( fname, R_OK ) == 0 ) {
+        // file exists
+        std::ifstream source_stream(filename);
+        const auto doc = json::parse(source_stream);
+        return load_json( doc );
+    } else {
+        // file missing
+        std::cerr << "!! Could not find input file !!: " << filename << std::endl;
+        return false;
+    }
+}
+
+template<typename layer_t>
+bool ChartLoader<layer_t>::load_text( std::string& source ){
+    // TODO: there exists some other function call for this...
+    const json doc = nlohmann::json::parse( text,    // source document
+                                            nullptr, // callback argument
+                                            false);  // allow exceptions?
+    return load_json( doc );
+}
+
+template<typename layer_t>
+bool ChartLoader<layer_t>::load_json( const nlohmann::json& doc ){
+    if (doc.is_discarded()) {
+        // cerr << "malformed json! ignore.\n" << endl;
+        // cerr << text << endl;
+        return false;
+    } else if (!doc.is_object()) {
+        // cerr << "input should be a json _object_!!\n" + doc.dump(4) << endl;
+        return false;
+    }
+
+    if (doc.contains(bounds_key)) {
+        const Bounds new_bounds = Bounds::make_from_json(doc[bounds_key]);
+        if( new_bounds.is_valid()){
+            destination_.set_bounds(new_bounds);
+            // continue
+        }else{
+            return true;
+        }
+    }
+
+    if ( doc.contains(grid_key) ){
+        const auto& grid = doc[grid_key];
+        if (!grid.is_array()){
+            return false;
+        }
+
+        if( destination_.size() != grid.size() ){
+            cerr << " expected a arrays!  aborting!\n";
+            return false;
+        }
+
+        std::vector<cell_t> buffer;
+        for (auto& cell : grid  ) {
+            buffer.push_back(cell.get<cell_t>());
+        }
+        auto flipped = chart::geometry::vflip(buffer, destination_.dimension() );
+
+        return destination_.fill(flipped);
+
+    }else if( doc.contains(allow_key) && doc[allow_key].is_array() ){
+        for( auto& list : doc[allow_key] ){
+            if (!list.is_array()){
+                cerr << "!? malformed json input... expected allow polygons to be lists" << endl;
+                return false;
+            }
+            const Polygon& allow_shape = geometry::Polygon(list);
+            destination_.fill(allow_shape, allow_value);
+        }
+
+        if( doc.contains(block_key) && doc[block_key].is_array() ){
+            for( auto& list : doc[block_key] ){
+                if (!list.is_array()){
+                    cerr << "!? malformed json input... expected allow polygons to be lists" << endl;
+                    return false;
+                }
+                const Polygon& block_shape = geometry::Polygon(list);
+                destination_.fill(block_shape, block_value);
+            }
+        }
+        return true;
+    }
+
+    return true;
+
+}
+
 
 // template <typename target_t, typename cell_t>
 // void chart::io::fill_from_polygon(target_t& t, const Polygon& poly,
@@ -248,3 +353,21 @@ CLEANUP_LOAD_SHAPEFILE:
     return true;
 }
 #endif //#ifdef ENABLE_GDAL
+
+
+template<typename T>
+std::vector<T> vflip(const std::vector<T>& source, const size_t row_width) {
+    const size_t row_count = source.size() / row_width;
+
+    std::vector<T> sink(source.size());
+
+    for (size_t read_row = 0; read_row < row_count; ++read_row) {
+        size_t write_row = row_count - read_row-1;
+
+        for (size_t column = 0; column < row_width; ++column) {
+            sink[write_row*row_width + column] = source[read_row*row_width + column];
+        }
+    }
+
+    return sink;
+}

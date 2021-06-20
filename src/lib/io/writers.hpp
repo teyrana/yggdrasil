@@ -1,17 +1,12 @@
-// GPL v3 (c) 2020, Daniel Williams 
+// GPL v3 (c) 2021, Daniel Williams 
 
-#ifndef _CHART_WRITERS_HPP_
-#define _CHART_WRITERS_HPP_
+#pragma once
 
 #include <cstddef>
 #include <string>
 #include <vector>
 
 #include <Eigen/Geometry>
-
-#include <nlohmann/json.hpp>
-
-#include "io/json.hpp"
 
 namespace chart::io {
 
@@ -22,5 +17,3 @@ bool to_grayscale_png(const std::vector<std::byte>& source,
 #endif
 
 }; // namespace chart::io
-
-#endif // #ifdef _CHART_WRITERS_HPP_

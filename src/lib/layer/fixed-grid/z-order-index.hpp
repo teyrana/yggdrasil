@@ -1,11 +1,8 @@
-// GPL v3 (c) 2020, Daniel Williams 
+// GPL v3 (c) 2021, Daniel Williams 
 
-#ifndef _Z_INDEX_HPP_
-#define _Z_INDEX_HPP_
+#pragma once
 
-#include "index2u.hpp"
-
-namespace chart::index {
+namespace chartbox::layer::grid {
 
 inline constexpr uint8_t _calculate_padding(const size_t dimension);
 inline uint64_t _interleave(const uint32_t input);
@@ -38,6 +35,4 @@ class ZOrderCurveIndex {
 
 } // namespace chart::index
 
-#include "z-index.inl"
-
-#endif // #ifdef _Z_INDEX_HPP_
+#include "z-order-index.inl"

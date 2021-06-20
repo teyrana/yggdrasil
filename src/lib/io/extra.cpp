@@ -5,150 +5,127 @@
 //       function implementations.
 
 #include <cstddef>
-
+#include <cstdio>
 #include <iostream>
 #include <memory>
-
-
+#include <string>
+#include <vector>
 
 using std::cerr;
 using std::endl;
 using std::string;
+
+#include <Eigen/Geometry>
+
+#include <nlohmann/json.hpp>
+
+#include "geometry/polygon.hpp"
+
+#ifdef ENABLE_GDAL
+#include <gdal/gdal.h>
+#include <gdal/gdal_priv.h>
+#endif
+
+#ifdef ENABLE_PDAL
+#include <pdal/pdal.h>
+#endif
 
 
 using Eigen::Vector2d;
 
 using chart::geometry::Polygon;
 
-template <typename target_t, typename cell_t>
-void chart::io::fill_from_polygon(target_t& t, const Polygon& poly,
-                                      const cell_t fill_value) {
-    // adapted from:
-    //  Public-domain code by Darel Rex Finley, 2007:  "Efficient Polygon Fill
-    //  Algorithm With C Code Sample" Retrieved:
-    //  (https://alienryderflex.com/polygon_fill/); 2019-09-07
+// template <typename target_t, typename cell_t>
+// void chart::io::fill_from_polygon(target_t& t, const Polygon& poly,
+//                                       const cell_t fill_value) {
+//     // adapted from:
+//     //  Public-domain code by Darel Rex Finley, 2007:  "Efficient Polygon Fill
+//     //  Algorithm With C Code Sample" Retrieved:
+//     //  (https://alienryderflex.com/polygon_fill/); 2019-09-07
 
-    const double scale_2 = t.scale / 2;
+//     const double scale_2 = t.scale / 2;
 
-    const Bounds bounds = t.get_bounds();
+//     const Bounds bounds = t.get_bounds();
 
-    // Loop through the rows of the image.
-    for (double y = bounds.min().y() + scale_2; y < bounds.max().y();
-         y += t.scale) {
-        // generate a list of line-segment crossings from the polygon
-        std::vector<double> crossings;
-        for (int i = 0; i < poly.size() - 1; ++i) {
-            const Vector2d& p1 = poly[i];
-            const Vector2d& p2 = poly[i + 1];
+//     // Loop through the rows of the image.
+//     for (double y = bounds.min().y() + scale_2; y < bounds.max().y();
+//          y += t.scale) {
+//         // generate a list of line-segment crossings from the polygon
+//         std::vector<double> crossings;
+//         for (int i = 0; i < poly.size() - 1; ++i) {
+//             const Vector2d& p1 = poly[i];
+//             const Vector2d& p2 = poly[i + 1];
 
-            const double y_max = std::max(p1[1], p2[1]);
-            const double y_min = std::min(p1[1], p2[1]);
-            // if y is in range:
-            if ((y_min <= y) && (y < y_max)) {
-                // construct x-coordinate that crosses this line:
-                auto value =
-                    p1[0] + (y - p1[1]) * (p2[0] - p1[0]) / (p2[1] - p1[1]);
-                crossings.emplace_back(value);
-            }
-        }
+//             const double y_max = std::max(p1[1], p2[1]);
+//             const double y_min = std::min(p1[1], p2[1]);
+//             // if y is in range:
+//             if ((y_min <= y) && (y < y_max)) {
+//                 // construct x-coordinate that crosses this line:
+//                 auto value =
+//                     p1[0] + (y - p1[1]) * (p2[0] - p1[0]) / (p2[1] - p1[1]);
+//                 crossings.emplace_back(value);
+//             }
+//         }
 
-        // early exit
-        if (0 == crossings.size()) {
-            continue;
-        }
+//         // early exit
+//         if (0 == crossings.size()) {
+//             continue;
+//         }
 
-        // Sort the crossings:
-        std::sort(crossings.begin(), crossings.end());
+//         // Sort the crossings:
+//         std::sort(crossings.begin(), crossings.end());
 
-        //  Fill the pixels between node pairs.
-        for (int crossing_index = 0; crossing_index < crossings.size();
-             crossing_index += 2) {
-            const double start_x =
-                bounds.constrain_x(crossings[crossing_index] + scale_2);
-            const double end_x =
-                bounds.constrain_x(crossings[crossing_index + 1] + scale_2);
-            for (double x = start_x; x < end_x; x += t.scale) {
-                t.store({x, y}, fill_value);
-            }
-        }
-    }
-}
+//         //  Fill the pixels between node pairs.
+//         for (int crossing_index = 0; crossing_index < crossings.size();
+//              crossing_index += 2) {
+//             const double start_x =
+//                 bounds.constrain_x(crossings[crossing_index] + scale_2);
+//             const double end_x =
+//                 bounds.constrain_x(crossings[crossing_index + 1] + scale_2);
+//             for (double x = start_x; x < end_x; x += t.scale) {
+//                 t.store({x, y}, fill_value);
+//             }
+//         }
+//     }
+// }
 
-template <typename target_t, typename cell_t>
-bool chart::io::load_grid_from_json(target_t& target, nlohmann::json grid) {
-    // const Layout& layout = target.get_layout();
+// template <typename target_t, typename cell_t>
+// bool chart::io::load_areas_from_json(target_t& target,
+//                                          nlohmann::json allow_doc,
+//                                          nlohmann::json block_doc) {
 
-    if (!grid.is_array() && !grid[0].is_array()) {
-        cerr << "chart::io::load_grid expected a array-of-arrays! "
-                "aborting!\n";
-        return false;
-    }
+//     const cell_t allow_value = 0;
+//     const cell_t block_value = 0x99;
 
-    if (grid.size() != target.dimension) {
-        cerr << "chart::io::load_grid expected a array of the same "
-                "dimension "
-                "as configured!!\n";
-        cerr << "    expected: " << target.dimension << endl;
-        cerr << "    found:    " << grid.size() << " x " << grid[0].size()
-             << endl;
-        return false;
-    }
+//     target.fill(block_value);
 
-    // populate the tree
-    size_t row_index = target.dimension - 1;
-    for (auto& row : grid) {
-        size_t column_index = 0;
+//     auto allowed_polygons = make_polygons_from_json(allow_doc);
+//     for (auto& poly : allowed_polygons) {
+//         target.fill(poly, allow_value);
+//     }
 
-        // i.e. a cell is the element at [column_index, row_index] <=> [x,y]
-        for (auto& cell : row) {
-            target.get_cell(row_index, column_index) = cell.get<cell_t>();
-            ++column_index;
-        }
-        --row_index;
-    }
+//     auto blocked_polygons = make_polygons_from_json(block_doc);
+//     for (auto& poly : blocked_polygons) {
+//         target.fill(poly, block_value);
+//     }
 
-    // target.prune();
+//     target.prune();
 
-    return true;
-}
+//     return true;
+// }
 
-template <typename target_t, typename cell_t>
-bool chart::io::load_areas_from_json(target_t& target,
-                                         nlohmann::json allow_doc,
-                                         nlohmann::json block_doc) {
-
-    const cell_t allow_value = 0;
-    const cell_t block_value = 0x99;
-
-    target.fill(block_value);
-
-    auto allowed_polygons = make_polygons_from_json(allow_doc);
-    for (auto& poly : allowed_polygons) {
-        target.fill(poly, allow_value);
-    }
-
-    auto blocked_polygons = make_polygons_from_json(block_doc);
-    for (auto& poly : blocked_polygons) {
-        target.fill(poly, block_value);
-    }
-
-    target.prune();
-
-    return true;
-}
-
-inline std::vector<Polygon>
-chart::io::make_polygons_from_json(nlohmann::json doc) {
-    std::vector<Polygon> result(static_cast<size_t>(doc.size()));
-    if (0 < result.size()) {
-        for (size_t polygon_index = 0; polygon_index < doc.size();
-             ++polygon_index) {
-            auto& poly_doc = doc[polygon_index];
-            result[polygon_index] = Polygon(poly_doc);
-        }
-    }
-    return result;
-}
+// inline std::vector<Polygon>
+// chart::io::make_polygons_from_json(nlohmann::json doc) {
+//     std::vector<Polygon> result(static_cast<size_t>(doc.size()));
+//     if (0 < result.size()) {
+//         for (size_t polygon_index = 0; polygon_index < doc.size();
+//              ++polygon_index) {
+//             auto& poly_doc = doc[polygon_index];
+//             result[polygon_index] = Polygon(poly_doc);
+//         }
+//     }
+//     return result;
+// }
 
 #ifdef ENABLE_GDAL
 inline Polygon

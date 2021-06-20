@@ -79,42 +79,27 @@
 
 # # ============= Build Project Tests  =================
 # # https://cmake.org/cmake/help/v3.0/module/FindGTest.html 
-SET(TEST_EXE testall)
-# SET(TEST_SOURCES    src/geometry/bounds.test.cpp
-#                     src/geometry/interpolate.test.cpp
-#                     src/geometry/path.test.cpp
-#                     src/geometry/polygon.test.cpp
-#                     src/index/row-index.test.cpp
-#                     src/index/z-index.test.cpp
-#                     src/grid/rolling-grid.test.cpp
-#                     src/grid/fixed-grid.test.cpp
-#                     src/search/a-star.test.cpp
-#                     # src/search/rrt-star.test.cpp
-#     )
+# SET(TEST_EXE testall)
+# # SET(TEST_SOURCES    src/geometry/bounds.test.cpp
+# #                     src/geometry/interpolate.test.cpp
+# #                     src/geometry/path.test.cpp
+# #                     src/geometry/polygon.test.cpp
+# #                     src/index/row-index.test.cpp
+# #                     src/index/z-index.test.cpp
+# #                     src/grid/rolling-grid.test.cpp
+# #                     src/grid/fixed-grid.test.cpp
+# #                     src/search/a-star.test.cpp
+# #                     # src/search/rrt-star.test.cpp
+# #     )
 
-SET(TEST_LINKAGE ${CHART_GRID_LIB_NAME} ${LIBRARY_LINKAGE} ${CONAN_LIBS} gtest gtest_main pthread)
+# SET(TEST_LINKAGE ${CHART_GRID_LIB_NAME} ${LIBRARY_LINKAGE} ${CONAN_LIBS} gtest gtest_main pthread)
 
-MESSAGE( STATUS "Generating all tests ...")
-MESSAGE( STATUS "    with name: ${TEST_EXE}")
-MESSAGE( STATUS "    with sources: ${TEST_SOURCES}")
-MESSAGE( STATUS "    with linkage: ${TEST_LINKAGE}")
+# MESSAGE( STATUS "Generating all tests ...")
+# MESSAGE( STATUS "    with name: ${TEST_EXE}")
+# MESSAGE( STATUS "    with sources: ${TEST_SOURCES}")
+# MESSAGE( STATUS "    with linkage: ${TEST_LINKAGE}")
 
-ADD_EXECUTABLE( ${TEST_EXE} ${TEST_SOURCES}) 
-ADD_TEST(AllTestsInFoo ${TEST_EXE}) 
+# ADD_EXECUTABLE( ${TEST_EXE} ${TEST_SOURCES}) 
+# ADD_TEST(AllTestsInFoo ${TEST_EXE}) 
 
-TARGET_LINK_LIBRARIES(${TEST_EXE} ${TEST_LINKAGE})
-
-
-# ============= Build Profiling Program  =================
-SET(PROFILE_EXE profile)
-SET(PROFILE_SOURCES tools/profile/main.cpp)
-
-MESSAGE( STATUS "Generating profiling program: ${PROFILE_EXE}")
-MESSAGE( STATUS "    with sources: ${PROFILE_SOURCES}")
-MESSAGE( STATUS "    with linkage: ${PROFILE_LINKAGE}") 
-
-# # DEVEL
-# ADD_EXECUTABLE( ${PROFILE_EXE} ${PROFILE_SOURCES})
-# TARGET_INCLUDE_DIRECTORIES(${PROFILE_EXE} PRIVATE vendor)
-
-# TARGET_LINK_LIBRARIES(${PROFILE_EXE} PRIVATE ${YGGDRASIL_LIB_NAME} ${PROFILE_LINKAGE}) 
+# TARGET_LINK_LIBRARIES(${TEST_EXE} ${TEST_LINKAGE})

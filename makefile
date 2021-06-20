@@ -10,17 +10,15 @@ TEST_EXE=build/bin/testall
 #-------------------------------------------------------------------
 #  Part 2: Invoke the call to make in the build directory
 #-------------------------------------------------------------------
-.PHONY: build
-build: debug 
 
 .PHONY: debug
-debug: BUILD_TYPE="Debug"
-debug: help configure #build
+debug: BUILD_TYPE=Debug
+debug: configure
 	cd $(BUILD_DIR) && ninja
 
 .PHONY: release
-release: BUILD_TYPE="Debug"
-release: configure build
+release: BUILD_TYPE=Release
+release: configure
 	cd $(BUILD_DIR) && ninja
 
 .PHONY: conan
@@ -34,16 +32,11 @@ configure: $(CONAN_MARKER)
 	cd $(BUILD_DIR) && \
 		cmake .. -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) -GNinja
 
-clean: 
+clean:
 	rm -rf build/*
 
 format:
 	@echo clang-tidy src
-
-.PHONY: help
-help: 
-	@ echo "Notes:"
-	@ echo "....nyi"
 
 .PHONY: test testgrid
 test: test-all

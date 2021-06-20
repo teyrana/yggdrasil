@@ -1,4 +1,4 @@
-// GPL v3 (c) 2020, Daniel Williams 
+// GPL v3 (c) 2021, Daniel Williams 
 
 // standard library includes
 #include <cstddef>
@@ -8,45 +8,27 @@
 #include <string>
 #include <vector>
 
-using std::cerr;
-using std::endl;
-using std::string;
 
 // third-party includes
-#include <Eigen/Geometry>
+// #include <Eigen/Geometry>
 
-#ifdef ENABLE_GDAL
-#include "gdal.h"
-#include "gdal_priv.h"
-#endif
+// #include <nlohmann/json.hpp>
 
-#include <nlohmann/json.hpp>
+// // first-party includes
+// #include "geometry/bounds.hpp"
+// #include "geometry/polygon.hpp"
 
-// first-party includes
-#include "geometry/bounds.hpp"
-#include "geometry/polygon.hpp"
-#include "geometry/raster.hpp"
 
-using Eigen::Vector2d;
-
-using chart::base::ChartInterface;
-using chart::geometry::Bounds;
-using chart::geometry::Path;
-using chart::geometry::Polygon;
-
-// used for reading and write json documents:
-const static inline string allow_key("allow");
-const static inline string block_key("block");
-const static inline string bounds_key("bounds");
-const static inline string grid_key("grid");
-const static inline string precision_key("precision");
-const static inline string tree_key("tree");
+// using chart::base::ChartInterface;
+// using chart::geometry::Bounds;
+// using chart::geometry::Path;
+// using chart::geometry::Polygon;
 
 // use this cast in order to play nice with the CRTP
-#define THIS static_cast<chart_t*>(this)
+#define THIS static_cast<layer_t*>(this)
 
-template <typename cell_t, typename chart_t>
-bool ChartInterface<cell_t, chart_t>::fill(const geometry::Path& path, const cell_t fill_value){
+template <typename cell_t, typename layer_t>
+bool ChartInterface<cell_t, layer_t>::fill(const geometry::Path& path, const cell_t fill_value){
     // const bool emphasize_waypoints = false;
 
     // fill start point
@@ -82,8 +64,8 @@ bool ChartInterface<cell_t, chart_t>::fill(const geometry::Path& path, const cel
     return true;
 }
 
-template <typename cell_t, typename chart_t>
-bool ChartInterface<cell_t, chart_t>::fill(const geometry::Polygon& poly, const cell_t fill_value){
+template <typename cell_t, typename layer_t>
+bool ChartInterface<cell_t, layer_t>::fill(const geometry::Polygon& poly, const cell_t fill_value){
     // adapted from:
     //  Public-domain code by Darel Rex Finley, 2007:  "Efficient Polygon Fill Algorithm With C Code Sample"
     //  Retrieved: (https://alienryderflex.com/polygon_fill/); 2019-09-07
@@ -130,8 +112,8 @@ bool ChartInterface<cell_t, chart_t>::fill(const geometry::Polygon& poly, const 
     return true;
 }
 
-template<typename cell_t, typename chart_t>
-bool ChartInterface<cell_t,chart_t>::load_json(const std::string& text){
+template<typename cell_t, typename layer_t>
+bool ChartInterface<cell_t,layer_t>::load_json(const std::string& text){
     const auto doc = nlohmann::json::parse( text,    // source document
                                             nullptr, // callback argument
                                             false);  // allow exceptions?
@@ -204,18 +186,8 @@ bool ChartInterface<cell_t,chart_t>::load_json(const std::string& text){
 // template<typename T>
 // Terrain<T>::Terrain(T& _ref): 
 //     impl(_ref) 
-// {
-// #ifdef ENABLE_GDAL
-//     GDALAllRegister();
-// #endif
-// }
+// {}
 
-// template<typename T>
-// Terrain<T>::~Terrain(){
-// #ifdef ENABLE_GDAL
-//     GDALDestroyDriverManager();
-// #endif
-// }
 
 // template<typename T>
 // cell_value_t Terrain<T>::classify(const Vector2d& p) const {

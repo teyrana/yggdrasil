@@ -44,8 +44,10 @@ This project uses CMake as its primary build system. `build.sh` in the base dire
 #### System - Installed (i.e. `apt install ...` or `brew install ...`)
 This project makes use of several libraries
 - cxxopts [10] - command-line argument parsing libary
-- FlatBuffers [12] - Used for tile serialization
-- GDAL [5] - Used for file I/O-- including height map as png, and loading shapefiles
+// - FlatBuffers [12] - Used for tile serialization
+- GDAL [5] - load shapefiles, PNG - height-maps
+- PDAL [?] - load LAS files
+- 
 - Google Test Framework [6]- used to run all of the development tests
 - Conan [13] - Use this to manage certain dependencies
 
@@ -64,6 +66,7 @@ References
 - [3] [Jefflarson/quadtree (C Implementation)](https://github.com/thejefflarson/quadtree)
 - [4] [nlohmann/json](https://github.com/nlohmann/json)
 - [5] [GDAL](https://gdal.org/)
+- [?] [gflags](https://github.com/gflags/gflags)
 - [6] [Google Test Framework](https://github.com/google/googletest)
 - [7] [Eigen library](http://eigen.tuxfamily.org/index.php)
 - [8] [Z-Order Curve](https://en.wikipedia.org/wiki/Z-order_curve)
