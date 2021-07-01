@@ -8,8 +8,7 @@
 
 #include <Eigen/Geometry>
 
-#include <nlohmann/json.hpp>
-
+#include "chart-frame-mapping.hpp"
 #include "chart-layer-interface.hpp"
 
 #include "layer/fixed-grid/fixed-grid.hpp"
@@ -19,9 +18,11 @@ namespace chartbox {
 /// \brief A container of containers for various types of map data structures
 class ChartBox {
 public:
-    ChartBox();
+    typedef chartbox::layer::FixedGridLayer boundary_layer_t;
+    typedef chartbox::layer::FixedGridLayer contour_layer_t;
     
-    int locate( const Eigen::Vector2d& center, const double width );
+public:
+    ChartBox();
 
     //// \brief retrieve the value of the requested point `p`. 
     ///
@@ -30,38 +31,30 @@ public:
     /// @return {cell_value_t} The value of the node, if available; or the default value.
     int classify(const Eigen::Vector2d& p) const;
 
+    boundary_layer_t& get_boundary_layer();
+
+    contour_layer_t& get_contour_layer();
     
-    // bool write_png(const std::string filename) const;
+    inline FrameMapping& mapping() { return mapping_; }
 
-    // \warn you may only create at the top of the layer stack.  plan ahead.
-    // \warn you may only create via constructing-in-place / indirectly. 
-    // \return index of created layer, or -1 for error
-    // int add_grid_layer();
-    // int add_tree_layer();
-
-    // size_t get_layer_count();
-
-    // /// \brief layer access
-    // /// \param index -- index of desired layer; 0 is the first and bottom layer
-    // /// \return request layer or null, if not available
-    // void* get_layer_at_index( const size_t index);
-
-    // void* operator[]( const size_t index );
-
-    // TODO: implement me
-    // auto get_boundary_layer();
-
-    std::string summary() const;
+    void print_layers() const;
 
     /// \brief Releases all memory associated with this quad tree.
-    ~ChartBox();
+    ~ChartBox() = default;
+
+public:
+    // NYI -- this should include all the to-global, and to-local code...
+    // Transform transform;
 
 private:
-    // defines boundaries in local frame, physical space
-    Eigen::AlignedBox2d bounds_;
+    FrameMapping mapping_;
 
-    chartbox::layer::FixedGridLayer _grid_layer;
+    boundary_layer_t boundary_layer_;
+    contour_layer_t contour_layer_;
     // TreeLayer _tree_layer;
+
+    // manually hard-coded. Unfortunately.
+    constexpr static size_t layer_count = 2;
 
 // private:
 //     friend class QuadTreeTest_ConstructDefault_Test;

@@ -6,14 +6,8 @@
 
 #include <gtest/gtest.h>
 
-#include "nlohmann/json.hpp"
 
-#include "geometry/bounds.hpp"
-#include "geometry/path.hpp"
-#include "geometry/polygon.hpp"
-#include "geometry/raster.hpp"
-
-#include "grid/fixed-grid.hpp"
+#include "fixed-grid.hpp"
 
 
 using std::cerr;
@@ -24,10 +18,9 @@ using std::string;
 using Eigen::Vector2d;
 using nlohmann::json;
 
-using chart::grid::FixedGrid1k;
-using chart::index::Index2u;
+using chart::layer::FixedGridLayer;
 
-namespace chart::grid {
+namespace chartbox::layer {
 
 TEST( FixedGrid, ConstructDefault64) {
     FixedGrid64 g;
@@ -299,88 +292,6 @@ TEST( FixedGrid, StoreReadLoop) {
 
     EXPECT_TRUE( g.store({50, 46}, 88) );
     ASSERT_EQ( g.classify({50, 46}), 88);
-}
-
-TEST( FixedGrid, LoadMalformedSource){
-    FixedGrid64 g;
-
-    EXPECT_DOUBLE_EQ( g.precision(),  1.);
-    EXPECT_DOUBLE_EQ( g.bounds().max().x(),  4.);
-    EXPECT_DOUBLE_EQ( g.bounds().max().y(),  4.);
-    EXPECT_DOUBLE_EQ( g.bounds().min().x(), -4.);
-    EXPECT_DOUBLE_EQ( g.bounds().min().y(), -4.);
-
-    // this is simply a malformed document.  It should not parse.
-    std::string source(R"({"bounds": {"x": 100, "y": 100, "width": )");
-    
-    // this should fail. Gracefully.
-    EXPECT_FALSE( g.load_json(source));
-
-    // these tests should be *exactly* the same as before the 'load' call
-    EXPECT_DOUBLE_EQ( g.precision(),  1.);
-    EXPECT_DOUBLE_EQ( g.bounds().max().x(),  4.);
-    EXPECT_DOUBLE_EQ( g.bounds().max().y(),  4.);
-    EXPECT_DOUBLE_EQ( g.bounds().min().x(), -4.);
-    EXPECT_DOUBLE_EQ( g.bounds().min().y(), -4.);
-}
-
-TEST( FixedGrid, LoadValidBoundsFromJSON){
-    FixedGrid1k g;
-
-    EXPECT_DOUBLE_EQ( g.bounds().max().x(),  16.);
-    EXPECT_DOUBLE_EQ( g.bounds().max().y(),  16.);
-    EXPECT_DOUBLE_EQ( g.bounds().min().x(), -16.);
-    EXPECT_DOUBLE_EQ( g.bounds().min().y(), -16.);
-
-    // construct a valid document, with correct fields, but missing required fields:
-    std::string source(R"({"bounds": {"center": [100, 100], "width": 64}} )");
-    
-    EXPECT_TRUE( g.load_json(source) );
-
-    // these tests should be *exactly* the same as before the 'load' call
-    EXPECT_DOUBLE_EQ( g.bounds().max().x(), 132.);
-    EXPECT_DOUBLE_EQ( g.bounds().max().y(), 132.);
-    EXPECT_DOUBLE_EQ( g.bounds().min().x(),  68.);
-    EXPECT_DOUBLE_EQ( g.bounds().min().y(),  68.);
-    EXPECT_DOUBLE_EQ( g.precision(), 2 );
-}
-
-TEST( FixedGrid, LoadGridFromJSON) {
-    FixedGrid64 g;
-
-    std::string text(R"({
-        "grid": [ 88, 88, 88, 88, 88, 88, 88, 88,
-                  88, 88, 88,  0,  0, 88, 88, 88,
-                  88, 88,  0,  0,  0,  0, 88, 88,
-                  88,  0,  0,  0,  0,  0,  0, 88,
-                  88, 88, 88, 88,  0,  0,  0, 88,
-                  88, 88, 88, 88,  0,  0, 88, 88,
-                  88, 88, 88, 88,  0, 88, 88, 88,
-                  88, 88, 88, 88, 88, 88, 88, 88 ]})");
-
-    ASSERT_EQ( 0, g.load_json(text) );
-
-    // // DEBUG
-    // cerr << g.to_string() << endl;
-
-    ASSERT_EQ( g.get_cell(0,0), 88);
-    ASSERT_EQ( g.get_cell(1,1), 88);
-    ASSERT_EQ( g.get_cell(2,2), 88);
-    ASSERT_EQ( g.get_cell(2,3), 88);
-    ASSERT_EQ( g.get_cell(2,4),  0);
-
-    ASSERT_EQ( g.get_cell(3,0), 88);
-    ASSERT_EQ( g.get_cell(3,1), 88);
-    ASSERT_EQ( g.get_cell(3,2), 88);
-    ASSERT_EQ( g.get_cell(3,3), 88);
-    ASSERT_EQ( g.get_cell(3,4),  0);
-    ASSERT_EQ( g.get_cell(3,5),  0);
-    ASSERT_EQ( g.get_cell(3,6),  0);
-    ASSERT_EQ( g.get_cell(3,7), 88);
-
-    ASSERT_EQ( g.get_cell(0,7), 88);
-    ASSERT_EQ( g.get_cell(1,6), 88);
-    ASSERT_EQ( g.get_cell(2,5),  0);
 }
 
 TEST( FixedGrid, FillSimplePolygon) {

@@ -1,84 +1,74 @@
 // GPL v3 (c) 2021, Daniel Williams 
 
 #include <cmath>
-#include <cstdio>
-#include <iomanip>
-#include <iostream>
 
-#include <Eigen/Dense>
-#include <Eigen/Geometry>
+#include <eigen3/Eigen/Dense>
+#include <eigen3/Eigen/Geometry>
 
-// #ifdef ENABLE_GDAL
-// #include "gdal.h"
-// #include "gdal_priv.h"
-// #endif
+#include <fmt/core.h>
 
-// #include <nlohmann/json.hpp>
-// using nlohmann::json;
+#include <gdal.h>
+#include <ogr_spatialref.h>
 
 #include "chart-box.hpp"
 
 using chartbox::ChartBox;
 
 ChartBox::ChartBox()
-    : bounds_(Eigen::Vector2d(0,0), Eigen::Vector2d(1,1))
-    , _grid_layer(bounds_)
+    : mapping_()
+    , boundary_layer_(mapping_.utm_bounds())
+    , contour_layer_(mapping_.utm_bounds())
 {
-#ifdef ENABLE_GDAL
-    GDALAllRegister();
-#endif
+
+    boundary_layer_.fill( boundary_layer_.default_value );
+    boundary_layer_.name("BoundaryLayerGrid");
+    
+    contour_layer_.fill( boundary_layer_.default_value );
+    contour_layer_.name("ContourLayerGrid");
 }
 
 int ChartBox::classify( const Eigen::Vector2d& /*p*/) const { 
     return 0;
 }
 
-// size_t ChartBox::get_layer_count() {
-//     return layers.size();
-// }
-
 // void* ChartBox::get_layer_at_index( const size_t index) {
 //     return this->operator[](index);
 // }
 
-int ChartBox::locate( const Eigen::Vector2d& center, const double width ) {
-    Eigen::Vector2d half_diag( width/2, width/2 );
-    bounds_.min() = center - half_diag;
-    bounds_.max() = center + half_diag;
-    return 0;
+ChartBox::boundary_layer_t& ChartBox::get_boundary_layer(){
+    return boundary_layer_;
 }
 
-// void* ChartBox::operator[]( const size_t index) {
-//     return index<layers.size() ? layers[index] : nullptr;
-// }
+ChartBox::contour_layer_t& ChartBox::get_contour_layer(){
+    return contour_layer_;
+}
 
-std::string ChartBox::summary() const {
-    std::ostringstream buf;
-
-    buf << "======== ======== Printing Layers: ======== ======== \n";
+void ChartBox::print_layers() const {
+    
+    fmt::print( "============ ============ Printing Layers: ============ ============ \n");
 
     int layer_index = 0;
 
-    // Bottom Layer
-    buf << "    [" << std::setw(2) << layer_index << ']' 
-                   << '<' << _grid_layer.type() << '>'
-                   << ':' << _grid_layer.name() << '\n';
+    // Boundary Layer
+    fmt::print( "    [{:02u}] <%s> :%s (%u x %u)\n", layer_index, boundary_layer_.type(), boundary_layer_.name(), boundary_layer_.dimension, boundary_layer_.dimension );
+    ++layer_index;
+
+    // Contour Layer
+    fmt::print( "    [{:02u}] <%s> :%s (%u x %u)\n", layer_index, contour_layer_.type(), contour_layer_.name(), contour_layer_.dimension, contour_layer_.dimension ); 
     ++layer_index;
 
     // next layer 
     // ...
 
 
-    buf << "======== ======== " << layer_index << " layers total ======== ========\n";
-
-    return buf.str();
+    fmt::print( "============ ============ {} layers total ============ ============ \n", layer_index );
 }
-    
-ChartBox::~ChartBox() { 
 
-#ifdef ENABLE_GDAL
-    GDALDestroyDriverManager();
-#endif
+// Eigen::Vector2d ChartBox::to_local( const Eigen::Vector2d& /*from*/ ){
+//     return {NAN,NAN};
+// }
 
+// Eigen::Vector2d ChartBox::to_global( const Eigen::Vector2d& /*from*/ ){
+//     return {NAN,NAN};
+// }
 
-}

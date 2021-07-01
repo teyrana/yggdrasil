@@ -8,21 +8,19 @@
 #include <string>
 #include <vector>
 
-#include <Eigen/Geometry>
-
-
 #include "chart-box/chart-layer-interface.hpp"
-
-#include "row-major-index.hpp"
 
 namespace chartbox::layer {
 
 class FixedGridLayer : public chartbox::ChartLayerInterface< uint8_t, FixedGridLayer> {
 public:
     typedef uint8_t cell_t;
+    typedef Eigen::Matrix<uint32_t,2,1> Vector2u;
+
+    /// \brief number of cells along each dimension of this grid
     constexpr static size_t dimension = 32;//1024;
 
-    constexpr static cell_t default_value = 128;
+    constexpr static cell_t default_value = 0xff;
     constexpr static cell_t blocking_threshold = 'A';
 
 public:
@@ -31,31 +29,50 @@ public:
     
     FixedGridLayer( const Eigen::AlignedBox2d& _bounds);
 
-    FixedGridLayer( double _precision, const Eigen::AlignedBox2d& _bounds);
+    cell_t* data();
 
-    void fill(const cell_t value);
+    // override from ChartLayerInterface
+    bool fill( const cell_t value );
+
+    bool fill( const Eigen::AlignedBox2d& area, const cell_t value ){
+        return super().fill( area, value ); }
+
+    bool fill( std::unique_ptr<OGRPolygon> source, cell_t value ){ 
+        return super().fill( std::move(source), value ); }
+    
+    /// \brief Fill the entire grid with values from the buffer
+    /// 
+    /// \param source - values to fill.  This must be the same byte-count as this layer
+    /// \param fill_value - value to write inside the area
+    bool fill( const std::vector<cell_t>& source );
 
     cell_t& get(const Eigen::Vector2d& p);
     cell_t get(const Eigen::Vector2d& p) const;
 
-    void reset();
+    size_t lookup( const uint32_t x, const uint32_t y ) const;
 
-    std::string name() const;
+    size_t lookup( const Vector2u i ) const;
+
+    size_t lookup( const Eigen::Vector2d& p ) const;
+
+    double precision() const;
 
     /// \brief Draws a simple debug representation of this grid to stderr
-    std::string to_string() const;
+    void print_contents() const;
+
+    void reset();
+
+    /// \brief Access the value at an (x, y) Eigen::Vector2d
+    ///!
+    /// \param Eigen::Vector2d - the x,y coordinates to search at:
+    /// \return reference to the cell value
+    bool store(const Eigen::Vector2d& p, const cell_t new_value);
 
     std::string type() const;
 
+    inline double width() const { return bounds_.sizes().maxCoeff(); }
+
     ~FixedGridLayer();
-
-
-    // /**
-    //  * Get the overall bounds of this tree
-    //  *
-    //  * @return Bounds object describing the tree's overall bounds.
-    //  */
-    // const Bounds& bounds() const;
 
     // /// \brief Retrieve the value at an (x, y) Eigen::Vector2d
     // ///
@@ -70,11 +87,6 @@ public:
     // // Overide from ChartInterface
     // bool contains(const Eigen::Vector2d& p) const;
 
-    // // Overide from ChartInterface
-    // bool contains(const index::Index2u& i) const;
-
-    // constexpr static size_t dimension() { return dim; }
-
     // /// \brief convert a nav-space location to a storage-space index
     // /// \warning behavior is undefined if `location` is outside of chart bounds
     // /// \warning rounds up, on borders
@@ -83,16 +95,6 @@ public:
     // /// \brief convert a storage-space location to a navigation-space location
     // /// \warning behavior is undefined if `index` is outside of chart bounds 
     // Vector2d as_location(const index::Index2u& index) const;
-
-    // /// \brief sets the entire grid to the given value
-    // /// \param fill_value - fill value for entire grid
-    // bool fill_uniform(const cell_t fill_value);
-
-    // /// \brief Fill the given area with the given value.
-    // /// 
-    // /// param source - bounds defining the fill araea.
-    // /// \param fill_value - value to write inside the area
-    // bool fill_from_bounds(const geometry::Bounds& area, const cell_t value);
 
     // /// \brief Load data into the grid, in memory-order
     // /// \param load n cells from the given pointer 
@@ -106,46 +108,26 @@ public:
     // cell_t& operator[](const index::Index2u& i);
     // cell_t operator[](const index::Index2u& i) const ;
 
-    // /// the spacing of each cell === center-to-center distance. === cell-width.
-    // double precision() const;
-
-    // /// \brief the _total_ number of cells in this grid === (width * height)
-    // size_t size() const;
-
-    // void set_bounds(const geometry::Bounds& newBounds);
-
-    // /// \brief Access the value at an (x, y) Eigen::Vector2d
-    // ///!
-    // /// \param Eigen::Vector2d - the x,y coordinates to search at:
-    // /// \return reference to the cell value
-    // bool store(const Eigen::Vector2d& p, const cell_t new_value);
-
     // bool to_png(const std::string filename) const;
 
 
-    // /// \brief the _total_ number of cells in this grid === (width * height)
-    // size_t width() const;
-
 protected:
-    /// \brief the data layout this grid represents
-    const Eigen::AlignedBox2d& bounds_;
-
     /// \brief name of this layer's type
     constexpr static char type_[] = "FixedGridLayer";
-
-    /// \brief descriptive for this layer's purpose
-    std::string name_;
-
-    /// how wide each cell is, in real units
-    constexpr static double precision_ = 1.0;
 
     /// \brief contains the data for this tile
     // raw array:  2D addressing is performed through the index, below
     std::array<cell_t, dimension*dimension> grid;
 
-    /// \brief defines lookup method for data in this tile
-    chartbox::layer::RowMajorIndex<dimension, 1, 1> index;
+private:
 
+    chartbox::ChartLayerInterface< uint8_t, FixedGridLayer>& super() {
+        return *static_cast<chartbox::ChartLayerInterface< uint8_t, FixedGridLayer>*>(this);
+    }
+
+    const chartbox::ChartLayerInterface< uint8_t, FixedGridLayer>& super() const {
+        return *static_cast<const chartbox::ChartLayerInterface< uint8_t, FixedGridLayer>*>(this);
+    }
 };
 
 

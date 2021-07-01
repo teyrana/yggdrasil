@@ -1,15 +1,13 @@
 
 # ============= Chart Loaders Library =================
 SET(LIB_NAME chartloaders)
-SET(LIB_HEADERS chart-base-loader.hpp
+SET(LIB_HEADERS chart-base-loader.hpp chart-debug-loader.hpp
                 chart-json-loader.hpp chart-json-loader.inl
-                # src/base/readers.inl
-                # src/base/writers.inl
                 )
 SET(LIB_SOURCES 
                 )
 
-MESSAGE( STATUS "Generating ChartBox Library: ${LIB_NAME}")
+MESSAGE( STATUS "Generating ChartBox Loaders Library: ${LIB_NAME}")
 MESSAGE( STATUS "    with headers: ${LIB_HEADERS}")
 MESSAGE( STATUS "    with sources: ${LIB_SOURCES}")
 
@@ -30,15 +28,15 @@ target_include_directories(${LIB_NAME} INTERFACE ${CMAKE_SRC_DIRECTORY}/src/lib/
 
 # ============= Chart Base Library =================
 SET(LIB_NAME chartwriters)
-SET(LIB_HEADERS # chart-base-loader.hpp
-#                 chart-json-loader.hpp chart-json-loader.inl
+SET(LIB_HEADERS chart-base-writer.hpp chart-debug-writer.hpp
+                chart-png-writer.hpp chart-png-writer.inl
                 # src/base/readers.inl
                 # src/base/writers.inl
                 )
 SET(LIB_SOURCES 
                 )
 
-MESSAGE( STATUS "Generating ChartBox Library: ${LIB_NAME}")
+MESSAGE( STATUS "Generating ChartBox Writers Library: ${LIB_NAME}")
 MESSAGE( STATUS "    with headers: ${LIB_HEADERS}")
 MESSAGE( STATUS "    with sources: ${LIB_SOURCES}")
 

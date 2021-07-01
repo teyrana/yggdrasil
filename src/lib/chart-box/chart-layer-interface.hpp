@@ -2,12 +2,10 @@
 
 #pragma once
 
-#include <Eigen/Geometry>
+#include <memory>
 
-// #include "geometry/bounds.hpp"
-// #include "geometry/path.hpp"
-// #include "geometry/polygon.hpp"
-// #include "index/index2u.hpp"
+#include <gdal.h>
+#include <ogr_geometry.h>
 
 namespace chartbox {
 
@@ -19,15 +17,15 @@ class ChartLayerInterface {
 protected:
     ChartLayerInterface() = default;
 
+    ChartLayerInterface( const Eigen::AlignedBox2d& _bounds);
+
 public:
-    /// \brief Retrieve the value at an (x, y) Eigen::Vector2d
-    ///
-    /// \param Eigen::Vector2d - the x,y coordinates to search at
-    /// \return the cell value
-    cell_t get(const Eigen::Vector2d& p) const { return layer().get(p); }
 
-    // { return static_cast<chart_t*>(this)->classify(p, default_value); }
-
+    /// \brief how wide each cell is, in real-world navigation units
+    constexpr static cell_t blocked_value = 0;
+    constexpr static cell_t clear_value = 0;
+    
+public:
     // /// \brief Retrieve the value at an (x, y) Eigen::Vector2d
     // ///
     // /// \param Eigen::Vector2d - the x,y coordinates to search at
@@ -41,49 +39,60 @@ public:
     // /// \return true if this data structure contains this index
     // bool contains(const index::Index2u& index) const {
 
-    std::string name() const { return layer().name_; }
+    /// \brief sets the entire grid to the given value
+    /// \param fill_value - fill value for entire grid
+    bool fill( const cell_t value ){
+        return layer().fill(value); }
 
-    bool fill(const cell_t value) const { return layer().fill(value); }
+    /// \brief Fill the given area with the given value.
+    /// 
+    /// \param source - bounds defining the fill araea
+    /// \param fill_value - value to write inside the box
+    bool fill( const Eigen::AlignedBox2d& area, const cell_t value );
 
-    void reset() { layer().reset(); }
-
-    std::string type() const { return layer().type_name_; }
-
-    // /// \brief Fills the _interior_ of the given polygon with the given value.
-    // /// 
-    // /// \param source - polygon defining the fill araea. Assumed to be closed, CCW, and non-intersecting
-    // /// \param fill_value -fill value for area
-    // bool fill(const geometry::Polygon& area, const cell_t value);
-
-    // bool fill(const std::vector<cell_t>& source) {
-    //     return static_cast<chart_t*>(this)->fill_from_buffer(source); }
-
-    // /// \brief Access the value at an (x, y) Eigen::Vector2d
-    // ///!
-    // /// \param Eigen::Vector2d - the x,y coordinates to search at:
-    // /// \return reference to the cell value
-    // bool store(const Eigen::Vector2d& p, const cell_t value) 
-    //     { return static_cast<chart_t*>(this)->store(p, value); }
-
-    // bool load_json(const std::string& source);
-
-    // void fill_from_polygon(target_t& t, const chart::geometry::Polygon& poly,
-    //                     const cell_t fill_value);
-
-    // ///! \brief loads all the allowed and blocked areas
-    // ///! @param allow - a (json) list of allowed areas, as defined by polygons, as
-    // /// defined by a list of points. ! @param block - a (json) list of blocked
-    // /// areas, as defined by polygons, as defined by a list of points.
-    // bool load_areas_from_json(target_t& chart, nlohmann::json allow,
-    //                         nlohmann::json block);
-
-#ifdef ENABLE_GDAL
-    ///! \brief load a .shp file into this chart.
-    // virtal inline geometry::Polygon _fill_interior(const OGRLinearRing& source, cell_t value ) = 0;
+    /// \brief Fills the interior of the given polygon with the given value.
+    /// 
+    /// \param source - polygon defining the fill araea. Assumed to be closed, CCW, and non-intersecting
+    /// \param fill_value - fill value for polygon interior
+    bool fill( std::unique_ptr<OGRPolygon> source, cell_t value );
 
     ///! \brief load a .shp file into this chart.
     // bool load_from_shape_file(target_t& chart, const std::string& filepath);
-#endif
+
+    /// \brief Retrieve the value at an (x, y) Eigen::Vector2d
+    ///
+    /// \param Eigen::Vector2d - the x,y coordinates to search at
+    /// \return the cell value
+    cell_t get(const Eigen::Vector2d& p) const { return layer().get(p); }
+
+    /// \brief Access the value at an (x, y) Eigen::Vector2d
+    ///!
+    /// \param Eigen::Vector2d - the x,y coordinates to search at:
+    /// \return reference to the cell value
+    cell_t& get( const Eigen::Vector2d& point ){
+        return layer().get(point); }
+
+    std::string name() const { return name_; }
+
+    layer_t name( const std::string& _name ){ name_ = _name; return layer(); }
+
+    /// \brief reset the layer to its default state
+    void reset() { 
+        layer().reset(); }
+
+    /// \brief store something at the a given (x, y) coordinate in nav-space
+    ///
+    /// \param point - the x,y coordinates to write to
+    /// \param value - the value to write at the given coordinates
+    /// \return true for success; else false
+    bool store(const Eigen::Vector2d& point, const cell_t value){
+        return layer().store(point,value); }
+
+    std::string print_contents() const { return layer().print_contents(); }
+
+    std::string type() const { return layer().type_name_; }
+
+    void update_precision(){ layer().update_precision(); }
 
 protected:
 
@@ -96,7 +105,17 @@ protected:
     }
 
     ~ChartLayerInterface() = default;
-    
+
+protected:
+
+    /// \brief the data layout this grid represents
+    const Eigen::AlignedBox2d& bounds_;
+
+    /// \brief descriptive for this layer's purpose
+    std::string name_;
+
 }; // class ChartLayerInterface< cell_t, layer_t >
 
 } // namespace chart
+
+#include "chart-layer-interface.inl"
